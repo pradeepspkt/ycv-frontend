@@ -9,8 +9,8 @@ export function MenuInner() {
   return (
     <>
       <MenuItem title="HOME" to='/dashboard' />
-      <MenuItem title='LEARNING' to='/blog-news' />
       <MenuItem title='BLOG' to='/blog-news' />
+      <MenuItem title='LEARNING' to='/educational-content' />
       {/* <MenuItem title='ROADMAP' to='' /> */}
 
       {/* <MenuInnerWithSub

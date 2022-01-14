@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react'
+import { Link } from 'react-router-dom'
 import {toAbsoluteUrl} from '../../../helpers'
 
 type Props = {
@@ -7,10 +8,12 @@ type Props = {
   time: string
   image: string
   title: string
-  description: string
+  description: string,
+  category?: string,
+  excerpt?: string
 }
 
-const MixedWidget5: React.FC<Props> = ({className, time, image, title, description}) => {
+const MixedWidget5: React.FC<Props> = ({className, time, image, title, description, category, excerpt}) => {
   return (
     <div className={`card ${className}`}>
       {/* begin::Body */}
@@ -35,7 +38,11 @@ const MixedWidget5: React.FC<Props> = ({className, time, image, title, descripti
           {/* end::Link */}
 
           {/* begin::Desc */}
-          <p className='py-3' dangerouslySetInnerHTML={{__html: description}}></p>
+          {/* <p className='py-3 text-muted' dangerouslySetInnerHTML={{__html: description.substr(0,250)+(250?'&hellip;':'')}}></p> */}
+          {/* <p className='py-3 text-muted'>{excerpt.substr(0,250)+(250?'...':'')}</p> */}
+          
+          <p className='text-muted py-3'>{excerpt?.substring(0,150)} ....</p>
+
           {/* end::Desc */}
         </div>
 
@@ -68,7 +75,15 @@ const MixedWidget5: React.FC<Props> = ({className, time, image, title, descripti
             <img src={toAbsoluteUrl('/media/avatars/150-8.jpg')} alt='' />
           </a>
         </div> */}
-        <button className='btn btn-primary btn-sm'>Read More</button>
+        <Link to={{
+          pathname: '/details',
+          state:{
+            title: title,
+            description: description,
+            category: category
+          }
+        }} className="btn btn-primary btn-sm">Read More</Link>
+        {/* <button className='btn btn-primary btn-sm'>Read More</button> */}
         {/* end::Team */}
       </div>
       {/* end::Body */}

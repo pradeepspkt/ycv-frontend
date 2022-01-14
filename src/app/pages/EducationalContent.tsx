@@ -19,7 +19,7 @@ type Props = {
     description: string
 }
 
-const BlogNews: React.FC<Props> = ({
+const EducationalContent: React.FC<Props> = ({
     className,
     color,
     svgIcon,
@@ -45,12 +45,13 @@ const BlogNews: React.FC<Props> = ({
                         ...doc.data(),
                         id: doc.id
                     })
+                    console.log(doc.excerpt)
                     setBlogs(blogTemp)
                 }
             });
             setLoading(1)
         }
-        getBlogs('blog-news')
+        getBlogs('educational')
     }, [])
 
 
@@ -65,9 +66,9 @@ const BlogNews: React.FC<Props> = ({
                 title={blog.title}
                 //@ts-ignore
                 description={blog.description}
+                category='educational'
                 //@ts-ignore
                 excerpt={blog.excerpt}
-                category='blog-news'
             />
         </div>
     );
@@ -76,13 +77,21 @@ const BlogNews: React.FC<Props> = ({
 
     return (
         <>
-        <PageTitle breadcrumbs={[]}>Latest Blog Posts And News</PageTitle>
+            <PageTitle breadcrumbs={[]}>YCV Crypto Learning</PageTitle>
+
             <div className='row'>
-                
+
                 {
                     loading == 1 ?
-                        renderBlogs : 
-                        <div className="d-flex flex-column-fluid flex-center">
+                        renderBlogs :
+                        <div>
+                            {/* <BallTriangle
+                                height="300"
+                                width="300"
+                                color="black"
+                                arialLabel="loading-indicator"
+                            /> */}
+                            <div className="d-flex flex-column-fluid flex-center">
                                 <CradleLoader
                                     arialLabel="loading-indicator"
                                     // height="150"
@@ -90,6 +99,10 @@ const BlogNews: React.FC<Props> = ({
                                     // color='#ef305e'
                                      />
                             </div>
+
+                        </div>
+
+
                 }
             </div>
 
@@ -97,4 +110,4 @@ const BlogNews: React.FC<Props> = ({
     )
 }
 
-export { BlogNews }
+export { EducationalContent }
