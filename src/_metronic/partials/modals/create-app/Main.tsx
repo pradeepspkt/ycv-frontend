@@ -5,6 +5,8 @@ import {Formik, Form, FormikValues, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
 import {StepperComponent} from '../../../assets/ts/components'
 
+
+
 interface ICreateAccount {
   appName: string
   category: string
@@ -245,7 +247,7 @@ const Main: FC = () => {
                               <ErrorMessage name='appName' />
                             </div>
                           </div>
-                          <div className='fv-row mb-10'>
+                          {/* <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
                               <span className='required'>Network/Chain</span>
                               <i
@@ -264,7 +266,7 @@ const Main: FC = () => {
                             <div className='text-danger'>
                               <ErrorMessage name='appName' />
                             </div>
-                          </div>
+                          </div> */}
 
                           {/* <div className='fv-row'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-4'>

@@ -39,13 +39,11 @@ const EducationalContent: React.FC<Props> = ({
             const querySnapshot = await getDocs(collection(db, "content"));
             querySnapshot.forEach(async (doc: any) => {
                 if (doc.data().category == category) {
-                    console.log(doc.data().date.toDate().toDateString())
                     await blogTemp.push({
                         ...blogTemp,
                         ...doc.data(),
                         id: doc.id
                     })
-                    console.log(doc.excerpt)
                     setBlogs(blogTemp)
                 }
             });
