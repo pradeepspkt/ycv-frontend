@@ -1,15 +1,23 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, {FC, useEffect, useRef, useState} from 'react'
-import {KTSVG, toAbsoluteUrl} from '../../../helpers'
-import {Formik, Form, FormikValues, Field, ErrorMessage} from 'formik'
+import React, { FC, useEffect, useRef, useState } from 'react'
+import { KTSVG, toAbsoluteUrl } from '../../../helpers'
+import { Formik, Form, FormikValues, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
-import {StepperComponent} from '../../../assets/ts/components'
+import { StepperComponent } from '../../../assets/ts/components'
+import { Switch } from 'react-router-dom'
+import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from "firebase/firestore";
+import { app, db } from '../../../../firebase';
 
 
 
 interface ICreateAccount {
   appName: string
   category: string
+  mCap: string,
+  symbol: string,
+  description: string,
+  chartLink: string,
+  webLink: string,
   framework: string
   dbName: string
   dbType: string
@@ -24,6 +32,11 @@ interface ICreateAccount {
 const inits: ICreateAccount = {
   appName: '',
   category: '1',
+  mCap: '',
+  symbol: '',
+  description: '',
+  chartLink: '',
+  webLink: '',
   framework: '1',
   dbName: '',
   dbType: '1',
@@ -37,22 +50,16 @@ const inits: ICreateAccount = {
 
 const createAppSchema = [
   Yup.object({
-    appName: Yup.string().required().label('App name'),
-    category: Yup.string().required().label('Category'),
+    appName: Yup.string().required().label('Coin name'),
+    symbol: Yup.string().required().label('Symbol'),
+    mCap: Yup.string().required().label('Market cap'),
   }),
   Yup.object({
-    framework: Yup.string().required().label('Framework'),
+    description: Yup.string().required().label('Description'),
   }),
   Yup.object({
-    dbName: Yup.string().required().label('Database name'),
-    dbType: Yup.string().required().label('Database engine'),
-  }),
-  Yup.object({
-    nameOnCard: Yup.string().required().label('Name'),
-    cardNumber: Yup.string().required().label('Card Number'),
-    cardExpiryMonth: Yup.string().required().label('Expiration Month'),
-    cardExpiryYear: Yup.string().required().label('Expiration Year'),
-    cardCvv: Yup.string().required().label('CVV'),
+    chartLink: Yup.string().required().label('Chart Link'),
+    webLink: Yup.string().required().label('Website Link'),
   }),
 ]
 
@@ -61,6 +68,16 @@ const Main: FC = () => {
   const stepper = useRef<StepperComponent | null>(null)
   const [currentSchema, setCurrentSchema] = useState(createAppSchema[0])
   const [initValues] = useState<ICreateAccount>(inits)
+
+
+  const [tokenName, setTokenName] = useState('');
+  const [symbol, setSymbol] = useState('');
+  const [mCap, setMCap] = useState('');
+  const [description, setDescription] = useState('');
+  const [chartlink, setChartLink] = useState('');
+  const [websiteLink, setWebsiteLink] = useState('');
+
+
 
   const loadStepper = () => {
     stepper.current = StepperComponent.createInsance(stepperRef.current as HTMLDivElement)
@@ -76,7 +93,7 @@ const Main: FC = () => {
     setCurrentSchema(createAppSchema[stepper.current.currentStepIndex - 1])
   }
 
-  const submitStep = (values: ICreateAccount, actions: FormikValues) => {
+  const submitStep = async (values: ICreateAccount, actions: FormikValues) => {
     if (!stepper.current) {
       return
     }
@@ -86,9 +103,21 @@ const Main: FC = () => {
     if (stepper.current.currentStepIndex !== stepper.current.totatStepsNumber) {
       stepper.current.goNext()
     } else {
+      const docRef = await addDoc(collection(db, "coins"), {
+        name: values.appName,
+        mCap: values.mCap,
+        webLink: values.webLink,
+        chartlink: values.chartLink,
+        description: values.description,
+        symbol: values.symbol,
+        status: 'pending',
+        votes: 0
+      });
+
       stepper.current.goto(1)
       actions.resetForm()
     }
+
   }
 
   useEffect(() => {
@@ -98,6 +127,7 @@ const Main: FC = () => {
 
     loadStepper()
   }, [stepperRef])
+
 
   return (
     <div className='modal fade' id='kt_modal_create_app' aria-hidden='true'>
@@ -163,7 +193,7 @@ const Main: FC = () => {
                       <div className='stepper-desc'>External links</div>
                     </div>
                   </div>
-                  
+
 
                   {/* <div className='stepper-item' data-kt-stepper-element='nav'>
                     <div className='stepper-line w-40px'></div>
@@ -179,7 +209,7 @@ const Main: FC = () => {
                       <div className='stepper-desc'>Provide payment details</div>
                     </div>
                   </div>
-
+*/}
                   <div className='stepper-item' data-kt-stepper-element='nav'>
                     <div className='stepper-line w-40px'></div>
 
@@ -193,7 +223,7 @@ const Main: FC = () => {
 
                       <div className='stepper-desc'>Review and Submit</div>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
               </div>
 
@@ -222,7 +252,9 @@ const Main: FC = () => {
                               className='form-control form-control-lg form-control-solid'
                               name='appName'
                               placeholder=''
+                            // onChange={setTokenData('tokenName')}
                             />
+                            {tokenName}
                             <div className='text-danger'>
                               <ErrorMessage name='appName' />
                             </div>
@@ -244,29 +276,31 @@ const Main: FC = () => {
                               placeholder=''
                             />
                             <div className='text-danger'>
-                              <ErrorMessage name='appName' />
+                              <ErrorMessage name='symbol' />
                             </div>
                           </div>
-                          {/* <div className='fv-row mb-10'>
+                          <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                              <span className='required'>Network/Chain</span>
+                              <span className='required'>Market Cap</span>
                               <i
                                 className='fas fa-exclamation-circle ms-2 fs-7'
                                 data-bs-toggle='tooltip'
-                                title='Specify your network'
+                                title='Specify market cap'
                               ></i>
                             </label>
 
                             <Field
-                              type='text'
+                              type='number'
+                              min='1'
                               className='form-control form-control-lg form-control-solid'
-                              name='network'
+                              name='mCap'
                               placeholder=''
+                              
                             />
                             <div className='text-danger'>
-                              <ErrorMessage name='appName' />
+                              <ErrorMessage name='mCap' />
                             </div>
-                          </div> */}
+                          </div>
 
                           {/* <div className='fv-row'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-4'>
@@ -321,20 +355,11 @@ const Main: FC = () => {
                                     </span>
                                   </span>
 
-                                  <span className='d-flex flex-column'>
-                                    <span className='fw-bolder fs-6'>Face to Face Discussions</span>
+                                  <span className='d-flex flex-column'>  // const setTokenData = (field: any) => {
+  //   switch(field){
 
-                                    <span className='fs-7 text-muted'>
-                                      Creating a clear text structure is just one aspect
-                                    </span>
-                                  </span>
-                                </span>
-
-                                <span className='form-check form-check-custom form-check-solid'>
-                                  <Field
-                                    className='form-check-input'
-                                    type='radio'
-                                    name='category'
+  //   }
+  // }
                                     value='2'
                                   />
                                 </span>
@@ -379,26 +404,27 @@ const Main: FC = () => {
                       </div>
 
                       <div data-kt-stepper-element='content'>
-                      <div className='fv-row mb-10'>
-                            <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                              <span className='required'>Description</span>
-                              <i
-                                className='fas fa-exclamation-circle ms-2 fs-7'
-                                data-bs-toggle='tooltip'
-                                title='Specify your network'
-                              ></i>
-                            </label>
+                        <div className='fv-row mb-10'>
+                          <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
+                            <span className='required'>Description</span>
+                            <i
+                              className='fas fa-exclamation-circle ms-2 fs-7'
+                              data-bs-toggle='tooltip'
+                              title='Specify your network'
+                            ></i>
+                          </label>
 
-                            <Field
-                              type='text'
-                              className='form-control form-control-lg form-control-solid'
-                              name='network'
-                              placeholder=''
-                            />
-                            <div className='text-danger'>
-                              <ErrorMessage name='appName' />
-                            </div>
+                          <Field
+                            type='text'
+                            as='textarea'
+                            className='form-control form-control-lg form-control-solid'
+                            name='description'
+                            placeholder=''
+                          />
+                          <div className='text-danger'>
+                            <ErrorMessage name='description' />
                           </div>
+                        </div>
                         {/* <div className='w-100'>
                           <div className='fv-row'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-4'>
@@ -525,11 +551,25 @@ const Main: FC = () => {
                             <Field
                               type='text'
                               className='form-control form-control-lg form-control-solid'
-                              name='dbName'
+                              name='chartLink'
                               placeholder=''
                             />
                             <div className='text-danger'>
-                              <ErrorMessage name='dbName' />
+                              <ErrorMessage name='chartLink' />
+                            </div>
+                          </div>
+
+                          <div className='fv-row mb-10'>
+                            <label className='required fs-5 fw-bold mb-2'>Website Link</label>
+
+                            <Field
+                              type='text'
+                              className='form-control form-control-lg form-control-solid'
+                              name='webLink'
+                              placeholder=''
+                            />
+                            <div className='text-danger'>
+                              <ErrorMessage name='webLink' />
                             </div>
                           </div>
 
@@ -630,7 +670,7 @@ const Main: FC = () => {
                         </div>
                       </div>
 
-                      <div data-kt-stepper-element='content'>
+                      {/* <div data-kt-stepper-element='content'>
                         <div className='w-100'>
                           <div className='pb-10 pb-lg-15'>
                             <h2 className='fw-bolder text-dark'>Billing Details</h2>
@@ -804,14 +844,14 @@ const Main: FC = () => {
                             </label>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
 
                       <div data-kt-stepper-element='content'>
                         <div className='w-100 text-center'>
-                          <h1 className='fw-bolder text-dark mb-3'>Release!</h1>
+                          <h1 className='fw-bolder text-dark mb-3'>Congratulations!</h1>
 
                           <div className='text-muted fw-bold fs-3'>
-                            Submit your app to kickstart your project.
+                            Your coin has been successfully submitted and ready for review.
                           </div>
 
                           <div className='text-center px-4 py-15'>
@@ -867,4 +907,4 @@ const Main: FC = () => {
   )
 }
 
-export {Main}
+export { Main }

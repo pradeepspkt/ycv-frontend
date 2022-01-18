@@ -22,14 +22,17 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
       const response = await fetch('https://geolocation-db.com/json/');
       const data = await response.json();
       await setIP(data.IPv4)
+      console.log(myIP)
+      console.log('--')
     }
 
     const getVotesByIP = async (docID: any) => {
       const docRef = doc(db, "voterIP", docID);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setVoteList(docSnap.data().coin)
+        await setVoteList(docSnap.data().coin)
       }
+      console.log(voteList)
     }
 
     const getCoins = async (status: string) => {
@@ -37,22 +40,46 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
       let listTemp: any = []
       const querySnapshot = await getDocs(collection(db, "coins"));
       querySnapshot.forEach(async (doc: any) => {
+        let coinName = await doc.data().name
+        // console.log(coinName)
+        //@ts-ignore
+        // let voteStatus = await voteList.includes(coinName)? false:true
+
+
+        let voteStatus = true
+        voteList.forEach((coin: any) => {
+          // console.log(coin)
+          //@ts-ignore
+          if (voteList.includes(coin)) {
+            if (coin == coinName) {
+              voteStatus = false
+            }
+          }
+        })
+
+        // console.log(voteStatus)
         if (doc.data().status == status) {
           await listTemp.push({
             ...listTemp,
             ...doc.data(),
-            id: doc.id
+            id: doc.id,
+            vote: voteStatus
           })
-          setPromotedList(listTemp)
+          // console.log(doc)
         }
       });
+      console.log(listTemp.length)
+      await listTemp.slice(2)
+      await setPromotedList(await listTemp.slice(1))
     }
 
-    setLoading(1)
+
     getIP()
     getVotesByIP(myIP)
-    getCoins('sponsored')
     console.log(voteList)
+    getCoins('sponsored')
+    setLoading(1)
+    // console.log(voteList)
     // console.log(myIP)
   }, [])
 
@@ -74,7 +101,7 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
             <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
               {
                 //@ts-ignore
-                item.name
+                item.symbol
               }
             </a>
             <span className='text-muted fw-bold text-muted d-block fs-7'>
@@ -96,17 +123,31 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
         {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
     $308,236,260
     </a> */}
-        <span className='text-dark fw-bold text-dark d-block fs-7'>${
+        <span className='text-dark fw-bold text-dark d-block fs-7'>{
           //@ts-ignore
-          item.mCap}</span>
+          item.mCap == 0 ? '--' : '$'+Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
       </td>
       <td><span className="badge badge-square badge-success fs-6 p-3">{
         //@ts-ignore
         item.votes}</span></td>
       <td>
-        <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-          VOTE
-        </button>
+        {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+          {
+            //@ts-ignore
+            item.vote ? 'VOTE' : 'VOTED'}
+        </button> */}
+
+        {
+          //@ts-ignore
+          item.vote ?
+            <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+              VOTE
+            </button>
+            :
+            <button type='submit' className='btn btn-sm btn-default' data-kt-menu-dismiss='true'>
+              VOTED
+            </button>
+        }
       </td>
     </tr>
   );
@@ -144,63 +185,51 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
             <div className='separator mb-3 opacity-75'></div>
             {/* end::Menu separator */}
             {/* begin::Menu item */}
-            <div className='menu-item px-3'>
+            {/* <div className='menu-item px-3'>
               <a href='#' className='menu-link px-3'>
                 New Ticket
               </a>
-            </div>
+            </div> */}
             {/* end::Menu item */}
             {/* begin::Menu item */}
             <div className='menu-item px-3'>
               <a href='#' className='menu-link px-3'>
-                New Customer
+                View All
               </a>
             </div>
             {/* end::Menu item */}
             {/* begin::Menu item */}
-            <div
+            {/* <div
               className='menu-item px-3'
               data-kt-menu-trigger='hover'
               data-kt-menu-placement='right-start'
               data-kt-menu-flip='left-start, top'
             >
-              {/* begin::Menu item */}
               <a href='#' className='menu-link px-3'>
                 <span className='menu-title'>New Group</span>
                 <span className='menu-arrow'></span>
               </a>
-              {/* end::Menu item */}
-              {/* begin::Menu sub */}
               <div className='menu-sub menu-sub-dropdown w-175px py-4'>
-                {/* begin::Menu item */}
                 <div className='menu-item px-3'>
                   <a href='#' className='menu-link px-3'>
                     Admin Group
                   </a>
                 </div>
-                {/* end::Menu item */}
-                {/* begin::Menu item */}
                 <div className='menu-item px-3'>
                   <a href='#' className='menu-link px-3'>
                     Staff Group
                   </a>
                 </div>
-                {/* end::Menu item */}
-                {/* begin::Menu item */}
                 <div className='menu-item px-3'>
                   <a href='#' className='menu-link px-3'>
                     Member Group
                   </a>
                 </div>
-                {/* end::Menu item */}
               </div>
-              {/* end::Menu sub */}
-            </div>
-            {/* end::Menu item */}
-            {/* begin::Menu item */}
+            </div> */}
             <div className='menu-item px-3'>
               <a href='#' className='menu-link px-3'>
-                New Contact
+                Contact Us
               </a>
             </div>
             {/* end::Menu item */}
@@ -208,13 +237,13 @@ const TablesWidget12: React.FC<Props> = ({ className }) => {
             <div className='separator mt-3 opacity-75'></div>
             {/* end::Menu separator */}
             {/* begin::Menu item */}
-            <div className='menu-item px-3'>
+            {/* <div className='menu-item px-3'>
               <div className='menu-content px-3 py-3'>
                 <a className='btn btn-primary btn-sm px-4' href='#'>
                   Generate Reports
                 </a>
               </div>
-            </div>
+            </div> */}
             {/* end::Menu item */}
           </div>
           {/* end::Menu 2 */}

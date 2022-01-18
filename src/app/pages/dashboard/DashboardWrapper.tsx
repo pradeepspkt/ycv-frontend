@@ -71,7 +71,7 @@ const DashboardPage: FC = () => (
           className='card-xl-stretch mb-xl-8'
         />
       </div>
-      <div className='col-xl-8 h-200px'>
+      <div className='col-xl-8'>
         <div className='row'>
           <div className='col-xl-3'>
             <StatisticsWidget5
