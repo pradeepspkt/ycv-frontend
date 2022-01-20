@@ -1,12 +1,182 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { KTSVG, toAbsoluteUrl } from '../../../helpers'
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit } from "firebase/firestore";
+import { app, db } from '../../../../firebase';
+import { ToastContainer, toast } from 'react-toastify';
+import {Link} from 'react-router-dom'
+import 'react-toastify/dist/ReactToastify.css';
 
 type Props = {
   className: string
 }
 
 const TablesWidget10: React.FC<Props> = ({ className }) => {
+  const [coinList, setCoinList] = useState([]);
+  const [myIP, setIP] = useState('');
+  const [voteList, setVoteList] = useState([]);
+  const [loading, setLoading] = useState(0);
+
+  useEffect(() => {
+    const getIP = async () => {
+      const response = await fetch('https://geolocation-db.com/json/');
+      const data = await response.json();
+      await setIP(data.IPv4)
+      console.log(myIP)
+      console.log('--')
+    }
+
+    const getVotesByIP = async (docID: any) => {
+      const docRef = doc(db, "voterIP", docID);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        await setVoteList(docSnap.data().coin)
+      }
+      console.log(voteList)
+    }
+
+    const getCoins = async (status: string) => {
+      setCoinList([])
+      let listTemp: any = []
+      // const first = query(collection(db, "coins"), orderBy("votes"), limit(10));
+      // const querySnapshot = await getDocs(first);
+      const querySnapshot = await getDocs(collection(db, "coins"));
+      querySnapshot.forEach(async (doc: any) => {
+        let coinName = await doc.data().name
+        let voteStatus = true
+        voteList.forEach((coin: any) => {
+          //@ts-ignore
+          if (voteList.includes(coin)) {
+            if (coin == coinName) {
+              voteStatus = false
+            }
+          }
+        })
+        if (doc.data().status == status) {
+          await listTemp.push({
+            ...listTemp,
+            ...doc.data(),
+            id: doc.id,
+            vote: voteStatus
+          })
+        }
+      });
+      await setCoinList(await listTemp)
+    }
+
+    getIP()
+    getVotesByIP(myIP)
+    console.log(voteList)
+    getCoins('approved')
+    setLoading(1)
+  }, [])
+
+  const submitVote = async (coin: string) => {
+    toast.success('Successfuly voted for ' + coin.toUpperCase() + '!! Submit your vote again tomorrow.', {
+      position: "bottom-right",
+      icon: "🚀",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }
+
+  function round(val: any, multiplesOf: any) {
+    var s = 1 / multiplesOf;
+    var res = Math.ceil(val * s) / s;
+    res = res < val ? res + multiplesOf : res;
+    var afterZero = multiplesOf.toString().split(".")[1];
+    return parseFloat(res.toFixed(afterZero ? afterZero.length : 0));
+  }
+
+
+  const renderList = coinList.map((item, index) => {
+    if (index > 9) return
+    return (
+      <tr>
+        <td>
+          <div className='d-flex align-items-center'>
+            <div className='symbol symbol-50px me-5'>
+              <span className='symbol-label bg-light'>
+                <img
+                  //@ts-ignore
+                  src={item.avatar}
+                  className='h-75 align-self-end'
+                  alt=''
+                />
+              </span>
+            </div>
+
+          </div>
+        </td>
+        <td>
+          <div className='d-flex justify-content-start flex-column mt-4'>
+            <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+              {
+                //@ts-ignore
+                item.symbol.toUpperCase()
+              }
+            </a>
+
+          </div>
+        </td>
+        <td>
+          <div className='d-flex justify-content-start flex-column'>
+            <span className='text-hover-primary mt-4 '>
+              {
+                //@ts-ignore
+                item.name.toUpperCase()
+              }
+            </span>
+
+          </div>
+
+        </td>
+        {/* <td>
+    <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
+  0.0087$
+</a>
+    <span className='text-dark fw-bold text-dark d-block fs-7'>$0.0...02877</span>
+  </td> */}
+        <td>
+          {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
+$308,236,260
+</a> */}
+          <span className='text-dark fw-bold text-dark d-block fs-7 mt-4'>{
+            //@ts-ignore
+            item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
+        </td>
+        <td><span className="badge badge-square badge-success fs-6 p-3 mt-4">{
+          //@ts-ignore
+          item.votes}</span></td>
+        <td>
+          {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+      {
+        //@ts-ignore
+        item.vote ? 'VOTE' : 'VOTED'}
+    </button> */}
+
+          {
+            //@ts-ignore
+            item.vote ?
+              //@ts-ignore
+              <button type='submit' className='btn btn-sm btn-primary mt-2' data-kt-menu-dismiss='true' onClick={() => { submitVote(item.name) }}>
+                VOTE
+              </button>
+              :
+              <button type='submit' className='btn btn-sm btn-default mt-2' data-kt-menu-dismiss='true'>
+                VOTED
+              </button>
+          }
+        </td>
+      </tr>
+    )
+  }
+  );
+
   return (
     <div className={`card ${className}`}>
       {/* begin::Header */}
@@ -22,7 +192,9 @@ const TablesWidget10: React.FC<Props> = ({ className }) => {
           data-bs-trigger='hover'
           title='Click to add a user'
         >
-          <a
+           <Link to="/all-coins" className="btn btn-primary btn-sm"> <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
+            View All</Link>
+          {/* <a
             href='#'
             className='btn btn-sm btn-light-primary'
           // data-bs-toggle='modal'
@@ -30,7 +202,7 @@ const TablesWidget10: React.FC<Props> = ({ className }) => {
           >
             <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
             View All
-          </a>
+          </a> */}
         </div>
       </div>
       {/* end::Header */}
@@ -39,415 +211,24 @@ const TablesWidget10: React.FC<Props> = ({ className }) => {
         {/* begin::Table container */}
         <div className='table-responsive'>
           {/* begin::Table */}
-          <table className='table table-rounded table-striped border gy-2 gs-5 table-hover'>
+          <table className='table table-rounded table-striped border border-gray-300 gy-2 gs-5 table-hover'>
             {/* begin::Table head */}
             <thead>
-              <tr className='fw-bold fs-6 text-gray-800 border-bottom border-gray-200'>
-                
-                <th className='min-w-150px'>Name</th>
-                <th className='min-w-140px'>Chain</th>
-                <th className='min-w-100px'>Market Cap</th>
-                <th className='min-w-100px'>Price</th>
-                <th className='min-w-100px'>Votes</th>
-                <th className='min-w-100px text-end'>Action</th>
+              <tr className='fw-bolder text-muted fw-bold fs-6 text-gray-800 border border-gray-200 h-50px pb-5 bg-light'>
+                <th className='min-w-100px'>Avatar</th>
+                <th className='min-w-200px'>Symbol</th>
+                <th className='min-w-200px'>Name</th>
+                <th className='min-w-200px'>Market Cap</th>
+                {/* <th className='min-w-100px'>Price</th> */}
+                <th className='min-w-200px'>Votes</th>
+                <th className='min-w-10px text-start rounded-end'>Action</th>
 
               </tr>
             </thead>
             {/* end::Table head */}
             {/* begin::Table body */}
             <tbody>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/16444.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        MetaFootball
-                      </a>
-                      <span className='text-muted  fw-bold d-block fs-7'>
-                        MTF
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">4200</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        Shiba Inu
-                      </a>
-                      <span className='text-muted fw-bold d-block fs-7'>
-                        SHIB
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $58,254,000
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      2.12$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">5</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/14911.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        MetaDoge
-                      </a>
-                      <span className='text-muted fw-bold d-block fs-7'>
-                        METADOGE
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">145</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/16444.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        DogeRun
-                      </a>
-                      <span className='text-muted  fw-bold d-block fs-7'>
-                        DRUN
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">8974</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/14490.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        Bit Hotel
-                      </a>
-                      <span className='text-muted  fw-bold d-block fs-7'>
-                        BTH
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">41</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src={toAbsoluteUrl('/media/svg/avatars/001-boy.svg')} alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        HalfPizza
-                      </a>
-                      <span className='text-muted  fw-bold d-block fs-7'>
-                        PIZA
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">8745</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/11079.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        BitGert
-                      </a>
-                      <span className='text-muted fw-bold d-block fs-7'>
-                        BRISE
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">1</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                
-                <td>
-                  <div className='d-flex align-items-center'>
-                    <div className='symbol symbol-45px me-5'>
-                      <img src='https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png' alt='' />
-                    </div>
-                    <div className='d-flex justify-content-start flex-column'>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary fs-6'>
-                        Solana
-                      </a>
-                      <span className='text-muted  fw-bold d-block fs-7'>
-                        SOL
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-
-                  <span className='fw-bold d-block fs-7'>
-                    BSC
-                  </span>
-                </td>
-                <td>
-                  <span className='fw-bold d-block fs-7'>
-                    $559,745,210
-                  </span>
-                </td>
-                <td>
-                  <div className='d-flex justify-content-start flex-shrink-0'>
-                    <span className='fw-bold d-block fs-7'>
-                      0.00578$
-                    </span>
-
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-start flex-shrink-0'>
-                <span className="badge badge-square badge-success fs-6 p-3">874</span>
-                  </div>
-                </td>
-                <td>
-                <div className='d-flex justify-content-end flex-shrink-0'>
-                  <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                    VOTE
-                  </button>
-                  </div>
-                </td>
-              </tr>
+              {renderList}
               {/* <tr>
                 <td>
                   <div className='form-check form-check-sm form-check-custom form-check-solid'>
@@ -733,6 +514,17 @@ const TablesWidget10: React.FC<Props> = ({ className }) => {
             </tbody>
             {/* end::Table body */}
           </table>
+
+          <div className='card-header'>
+            <span className='mt-5 align-items-start flex-column'>
+              Page 1 of {round(coinList.length / 10, 1)}
+            </span>
+            <ul className="pagination pagination-outline mt-3">
+              <li className="page-item previous disabled m-1"><a href="#" className="page-link"><i className="previous"></i></a></li>
+
+              <li className="page-item next m-1"><a href="#" className="page-link"><i className="next"></i></a></li>
+            </ul>
+          </div>
           {/* end::Table */}
         </div>
         {/* end::Table container */}

@@ -6,7 +6,10 @@ import * as Yup from 'yup'
 import { StepperComponent } from '../../../assets/ts/components'
 import { Switch } from 'react-router-dom'
 import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from "firebase/firestore";
-import { app, db } from '../../../../firebase';
+import { app, db, storage } from '../../../../firebase';
+import { getStorage, ref, uploadString, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 
@@ -69,6 +72,8 @@ const Main: FC = () => {
   const [currentSchema, setCurrentSchema] = useState(createAppSchema[0])
   const [initValues] = useState<ICreateAccount>(inits)
 
+  const [showSnack, setShowSnack] = useState(true);
+  const [snackMsg, setSnackMsg] = useState('');
 
   const [tokenName, setTokenName] = useState('');
   const [symbol, setSymbol] = useState('');
@@ -76,6 +81,37 @@ const Main: FC = () => {
   const [description, setDescription] = useState('');
   const [chartlink, setChartLink] = useState('');
   const [websiteLink, setWebsiteLink] = useState('');
+  const [tokenLogo, setTokenLogo] = useState('');
+
+  const [file, setFile] = useState(null);
+  const [imageURL, setURL] = useState("");
+
+  const storage = getStorage();
+  //@ts-ignore
+
+
+  // function handleChange(e:any) {
+  //   setFile(e.target.files[0]);
+  // }
+
+
+  const toggleShowSnack = () => setShowSnack(!showSnack);
+  const snackMessage = (message: string) => {
+    setSnackMsg(message)
+  }
+
+  const handleChange = async (e: any) => {
+    console.log(await e.target.files[0])
+    await setFile(await e.target.files[0]);
+    let reader = new FileReader();
+    await reader.readAsDataURL(await e.target.files[0]);
+    reader.onload = async (e: any) => {
+      //@ts-ignore
+      await setURL(await e.target.result.split(',')[1])
+    }
+
+  }
+
 
 
 
@@ -94,6 +130,13 @@ const Main: FC = () => {
   }
 
   const submitStep = async (values: ICreateAccount, actions: FormikValues) => {
+    setTokenName(values.appName)
+    // setTokenLogo(file)
+    setMCap(values.mCap)
+    setChartLink(values.chartLink)
+    setWebsiteLink(values.webLink)
+    setDescription(values.description)
+    setSymbol(values.symbol)
     if (!stepper.current) {
       return
     }
@@ -103,16 +146,89 @@ const Main: FC = () => {
     if (stepper.current.currentStepIndex !== stepper.current.totatStepsNumber) {
       stepper.current.goNext()
     } else {
-      const docRef = await addDoc(collection(db, "coins"), {
-        name: values.appName,
-        mCap: values.mCap,
-        webLink: values.webLink,
-        chartlink: values.chartLink,
-        description: values.description,
-        symbol: values.symbol,
-        status: 'pending',
-        votes: 0
+
+      //@ts-ignore
+      const storageRef = ref(storage, 'images/' + file.name);
+
+      toast.success('🦄 Coin submission in progress', {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
       });
+
+
+      //@ts-ignore
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Observe state change events such as progress, pause, and resume
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          // toggleShowSnack()
+
+          switch (snapshot.state) {
+            case 'paused':
+              console.log('Upload is paused');
+              break;
+            case 'running':
+              console.log('Upload is running');
+              break;
+          }
+        },
+        (error) => {
+          // Handle unsuccessful uploads
+          toast.success('Error submitting! Please try again later.', {
+            position: "bottom-right",
+            autoClose: 10000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        },
+        () => {
+          // Handle successful uploads on complete
+          // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+            const docRef = await addDoc(collection(db, "coins"), {
+              name: values.appName,
+              mCap: values.mCap,
+              webLink: values.webLink,
+              chartlink: values.chartLink,
+              description: values.description,
+              symbol: values.symbol,
+              status: 'pending',
+              votes: 0,
+              avatar: downloadURL
+            });
+
+
+
+            toast.success('🦄 Coin submitted successfully! Ready for review.', {
+              position: "bottom-right",
+              autoClose: 10000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            });
+          });
+        }
+      );
+
+
+      // uploadString(storageRef, imageURL, 'base64').then((snapshot) => {
+      //   console.log('Uploaded a base64 string!');
+      //   console.log(snapshot)
+      // });
+
+
 
       stepper.current.goto(1)
       actions.resetForm()
@@ -240,6 +356,7 @@ const Main: FC = () => {
                           <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
                               <span className='required'>Token Name</span>
+
                               <i
                                 className='fas fa-exclamation-circle ms-2 fs-7'
                                 data-bs-toggle='tooltip'
@@ -295,12 +412,33 @@ const Main: FC = () => {
                               className='form-control form-control-lg form-control-solid'
                               name='mCap'
                               placeholder=''
-                              
+
                             />
                             <div className='text-danger'>
                               <ErrorMessage name='mCap' />
                             </div>
                           </div>
+
+                          <div className='fv-row mb-10'>
+                            <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
+                              <span className='required'>Upload Image</span>
+                              <i
+                                className='fas fa-exclamation-circle ms-2 fs-7'
+                                data-bs-toggle='tooltip'
+                                title='Upload your image'
+                              ></i>
+                            </label>
+
+                            <input
+                              // allows you to reach into your file directory and upload image to the browser
+                              type="file"
+                              onChange={handleChange}
+                            />
+                            {/* <div className='text-danger'>
+                              <ErrorMessage name='mCap' />
+                            </div> */}
+                          </div>
+
 
                           {/* <div className='fv-row'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-4'>
@@ -549,7 +687,7 @@ const Main: FC = () => {
                             <label className='required fs-5 fw-bold mb-2'>Chart link</label>
 
                             <Field
-                              type='text'
+                              type='url'
                               className='form-control form-control-lg form-control-solid'
                               name='chartLink'
                               placeholder=''
@@ -563,7 +701,7 @@ const Main: FC = () => {
                             <label className='required fs-5 fw-bold mb-2'>Website Link</label>
 
                             <Field
-                              type='text'
+                              type='url'
                               className='form-control form-control-lg form-control-solid'
                               name='webLink'
                               placeholder=''
@@ -847,20 +985,41 @@ const Main: FC = () => {
                       </div> */}
 
                       <div data-kt-stepper-element='content'>
-                        <div className='w-100 text-center'>
-                          <h1 className='fw-bolder text-dark mb-3'>Congratulations!</h1>
+                        <div className='w-100'>
+                          <h1 className='fw-bolder text-dark mb-1'>Review and Submit!</h1>
 
-                          <div className='text-muted fw-bold fs-3'>
-                            Your coin has been successfully submitted and ready for review.
+                          <div className='text-muted fs-4'>
+                            {
+                              file ?
+                                <img
+                                  //@ts-ignore
+                                  src={URL.createObjectURL(file)}
+                                  alt=''
+                                  className='w-50 mh-80px m-5'
+                                />
+                                :
+                                null
+                            }
+
+                            <p><b>Name: </b>{tokenName}</p>
+                            <p><b>Symbol: </b>{symbol}</p>
+                            <p><b>Market Cap: </b>{mCap}</p>
+                            <p><b>Website link: </b>{websiteLink}</p>
+                            <p><b>Chart Link: </b>{chartlink}</p>
+                            <p><b>Description: </b>
+                              <div style={{ height: '150px', overflowY: 'scroll' }}>
+                              {description}
+                              </div>
+                              </p>
                           </div>
 
-                          <div className='text-center px-4 py-15'>
+                          {/* <div className='text-center px-4 py-15'>
                             <img
                               src={toAbsoluteUrl('/media/illustrations/sketchy-1/9.png')}
                               alt=''
-                              className='w-100 mh-300px'
+                              className='w-70 mh-150px'
                             />
-                          </div>
+                          </div> */}
                         </div>
                       </div>
 
@@ -903,6 +1062,17 @@ const Main: FC = () => {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={10000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   )
 }
