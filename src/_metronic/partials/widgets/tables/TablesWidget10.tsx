@@ -1,78 +1,122 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react'
 import { KTSVG, toAbsoluteUrl } from '../../../helpers'
-import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc } from "firebase/firestore";
 import { app, db } from '../../../../firebase';
 import { ToastContainer, toast } from 'react-toastify';
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from 'react';
+import { ReactReduxContext } from 'react-redux'
 
 type Props = {
-  className: string
+  className: string,
+  hideViewAllButton?: Boolean
 }
 
-const TablesWidget10: React.FC<Props> = ({ className }) => {
+const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const [coinList, setCoinList] = useState([]);
   const [myIP, setIP] = useState('');
   const [voteList, setVoteList] = useState([]);
   const [loading, setLoading] = useState(0);
+  const { store } = useContext(ReactReduxContext)
 
   useEffect(() => {
-    const getIP = async () => {
-      const response = await fetch('https://geolocation-db.com/json/');
-      const data = await response.json();
-      await setIP(data.IPv4)
-      console.log(myIP)
-      console.log('--')
-    }
+    main()
 
-    const getVotesByIP = async (docID: any) => {
-      const docRef = doc(db, "voterIP", docID);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        await setVoteList(docSnap.data().coin)
-      }
-      console.log(voteList)
-    }
+    console.log(store)
 
-    const getCoins = async (status: string) => {
-      setCoinList([])
-      let listTemp: any = []
-      // const first = query(collection(db, "coins"), orderBy("votes"), limit(10));
-      // const querySnapshot = await getDocs(first);
-      const querySnapshot = await getDocs(collection(db, "coins"));
-      querySnapshot.forEach(async (doc: any) => {
-        let coinName = await doc.data().name
-        let voteStatus = true
-        voteList.forEach((coin: any) => {
-          //@ts-ignore
-          if (voteList.includes(coin)) {
-            if (coin == coinName) {
-              voteStatus = false
-            }
-          }
-        })
-        if (doc.data().status == status) {
-          await listTemp.push({
-            ...listTemp,
-            ...doc.data(),
-            id: doc.id,
-            vote: voteStatus
-          })
-        }
-      });
-      await setCoinList(await listTemp)
-    }
-
-    getIP()
-    getVotesByIP(myIP)
-    console.log(voteList)
-    getCoins('approved')
-    setLoading(1)
   }, [])
 
-  const submitVote = async (coin: string) => {
-    toast.success('Successfuly voted for ' + coin.toUpperCase() + '!! Submit your vote again tomorrow.', {
+  const getIP = async () => {
+    const response = await fetch('https://geolocation-db.com/json/');
+    const data = await response.json();
+    await setIP(data.IPv4)
+    return data.IPv4
+  }
+
+  const getVoteList = async (ip: any) => {
+    const docRef = doc(db, "voterIP", ip);
+    const docSnap = await getDoc(docRef);
+    let ipData: any = []
+    if (docSnap.exists()) {
+      await setVoteList(docSnap.data().coin)
+      ipData = docSnap.data().coin
+    }
+    return ipData
+  }
+
+  const addToVoteList = async (ip: any, symbol: any) => {
+    const docRef = doc(db, "voterIP", ip);
+    const docSnap = await getDoc(docRef);
+    let voteData: any = []
+    if (docSnap.exists()) {
+      voteData = docSnap.data().coin
+      voteData.push(symbol.toUpperCase())
+      await updateDoc(docRef, {
+        coin: voteData
+      });
+    } else {
+      voteData.push(symbol.toUpperCase())
+      await setDoc(doc(db, "voterIP", myIP), {
+        coin: voteData
+      });
+    }
+  }
+
+  const addVote = async (id: any) => {
+    console.log(id)
+    const docRef = doc(db, "coins", id);
+    const docSnap = await getDoc(docRef);
+    let count: any = null
+    if (docSnap.exists()) {
+      count = docSnap.data().votes + 1
+      await updateDoc(docRef, {
+        votes: count
+      });
+    }
+  }
+
+  const getCoins = async (status: string) => {
+    // setPromotedList([])
+    let listTemp: any = []
+    const querySnapshot = await getDocs(collection(db, "coins"));
+    querySnapshot.forEach(async (doc: any) => {
+      if (doc.data().status == status) {
+        await listTemp.push({
+          ...doc.data(),
+          id: doc.id,
+        })
+      }
+    });
+    return listTemp
+  }
+
+  const populateVotes = async (coins: any, voteList: any) => {
+    for (let i = 0; i < coins.length; i++) {
+      let coinSymbol = (coins[i].symbol).toUpperCase()
+      let status = 1
+      console.log(coinSymbol)
+      if (await voteList.includes(coinSymbol)) {
+        console.log(coinSymbol + ' Found')
+        status = 0
+      }
+      coins[i].vote = status
+    }
+    await setCoinList(coins)
+  }
+
+  const main = async () => {
+    let ipAddress = await getIP()
+    let voteList = await getVoteList(ipAddress)
+    let coins = await getCoins('approved')
+    await populateVotes(coins, voteList)
+    setLoading(1)
+  }
+
+
+  const submitVote = async (coin: string, index: number, id: string) => {
+    toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
       position: "bottom-right",
       icon: "🚀",
       autoClose: 5000,
@@ -82,7 +126,27 @@ const TablesWidget10: React.FC<Props> = ({ className }) => {
       draggable: true,
       progress: undefined,
     });
+    // let coins = await promotedList
+    // //@ts-ignore
+    // coins[index].vote = 2
+    // await setPromotedList(coins)
+    // console.log(promotedList)
+    await addToVoteList(myIP, coin)
+    await addVote(id)
+    await main()
+
+    toast.success('Vote successfull! Please submit your vote again tomorrow.', {
+      position: "bottom-right",
+      icon: "🚀",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
   }
+
 
   function round(val: any, multiplesOf: any) {
     var s = 1 / multiplesOf;
@@ -161,16 +225,28 @@ $308,236,260
 
           {
             //@ts-ignore
-            item.vote ?
-              //@ts-ignore
-              <button type='submit' className='btn btn-sm btn-primary mt-2' data-kt-menu-dismiss='true' onClick={() => { submitVote(item.name) }}>
-                VOTE
-              </button>
-              :
-              <button type='submit' className='btn btn-sm btn-default mt-2' data-kt-menu-dismiss='true'>
-                VOTED
-              </button>
+            item.vote == 1 &&
+            //@ts-ignore
+            <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { submitVote(item.symbol, index, item.id) }}>
+              VOTE !
+            </button>
           }
+          {
+            //@ts-ignore
+            item.vote == 0 &&
+            <button type='submit' disabled className='btn btn-sm btn-secondary' data-kt-menu-dismiss='true'>
+              VOTED
+            </button>
+
+          }
+          {
+            //@ts-ignore
+            item.vote == 2 &&
+            <button type='submit' className='btn btn-sm btn-default' data-kt-menu-dismiss='true'>
+              Voting In Progress
+            </button>
+          }
+
         </td>
       </tr>
     )
@@ -191,9 +267,12 @@ $308,236,260
           data-bs-placement='top'
           data-bs-trigger='hover'
           title='Click to add a user'
-        >
-           <Link to="/all-coins" className="btn btn-primary btn-sm"> <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
-            View All</Link>
+        >{
+            hideViewAllButton ?
+              null :
+              <Link to="/all-coins" className="btn btn-sm btn-light-primary"> <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
+                View All</Link>
+          }
           {/* <a
             href='#'
             className='btn btn-sm btn-light-primary'
@@ -530,6 +609,17 @@ $308,236,260
         {/* end::Table container */}
       </div>
       {/* begin::Body */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={10000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   )
 }

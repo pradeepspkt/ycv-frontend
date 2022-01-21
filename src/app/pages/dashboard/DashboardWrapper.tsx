@@ -22,6 +22,7 @@ import {
   FooterRight
 } from '../../../_metronic/partials/widgets'
 
+
 const DashboardPage: FC = () => (
   <>
     {/* begin::Row */}
@@ -116,26 +117,26 @@ const DashboardPage: FC = () => (
 
     <div className='row' >
       <div className='col-xl-6 '>
-      <FooterLeft
-              className='card-xl-stretch mb-xl-8'
-              svgIcon='/media/icons/duotune/general/gen032.svg'
-              color='white'
-              iconColor='primary'
-              title='Advertise'
-              description='Advertise with us'
+        <FooterLeft
+          className='card-xl-stretch mb-xl-8'
+          svgIcon='/media/icons/duotune/general/gen032.svg'
+          color='white'
+          iconColor='primary'
+          title='Advertise'
+          description='Advertise with us'
 
-            />
+        />
       </div>
       <div className='col-xl-6 '>
-      <FooterRight
-              className='card-xl-stretch mb-xl-8'
-              svgIcon='/media/icons/duotune/general/gen032.svg'
-              color='white'
-              iconColor='primary'
-              title='Advertise'
-              description='Advertise with us'
+        <FooterRight
+          className='card-xl-stretch mb-xl-8'
+          svgIcon='/media/icons/duotune/general/gen032.svg'
+          color='white'
+          iconColor='primary'
+          title='Advertise'
+          description='Advertise with us'
 
-            />
+        />
       </div>
     </div>
 
@@ -170,7 +171,11 @@ const DashboardPage: FC = () => (
 )
 
 const DashboardWrapper: FC = () => {
-  const intl = useIntl()
+  // const intl = useIntl()
+  // const response = fetch('https://geolocation-db.com/json/');
+  // //@ts-ignore
+  // const data = response.json();
+  // console.log(data)
   return (
     <>
       {/* <PageTitle breadcrumbs={[]}>{intl.formatMessage({id: 'MENU.DASHBOARD'})}</PageTitle> */}

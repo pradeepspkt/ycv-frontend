@@ -1072,6 +1072,7 @@ const Main: FC = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        style={{ fontFamily: 'inherit', fontWeight: 'bold' }}
       />
     </div>
   )

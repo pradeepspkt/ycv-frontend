@@ -39,7 +39,7 @@ type Props = {
     description: string
 }
 
-const AllCoins: React.FC<Props> = ({
+const PromotedCoinsList: React.FC<Props> = ({
     className,
     color,
     svgIcon,
@@ -49,12 +49,12 @@ const AllCoins: React.FC<Props> = ({
 }) => {
     return (
         <>
-            <PageTitle breadcrumbs={[]}>All coins Listed</PageTitle>
+            <PageTitle breadcrumbs={[]}>Want to promote your coin? Contact us!</PageTitle>
             <div className='row'>
-                <TablesWidget10 className='card-xxl-stretch mb-5 mb-xl-8' hideViewAllButton={true} />
+                <TablesWidget12 className='card-xxl-stretch mb-5 mb-xl-8' hideViewAllButton={true} />
             </div>
         </>
     )
 }
 
-export { AllCoins }
+export { PromotedCoinsList }
