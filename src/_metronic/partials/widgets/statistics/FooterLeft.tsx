@@ -36,7 +36,17 @@ const FooterLeft: React.FC<Props> = ({
           <div className={`fw-bold text-inverse-white fs-7`}>Can't find your coin? List your favorite coin now!
             </div>
             <br />
-          <button className='btn btn-primary btn-sm mt-5'>Submit token</button>
+            <a
+            href='#'
+            className='btn btn-sm btn-primary btn-rounded btn-active-color-white'
+            data-bs-toggle='modal'
+            data-bs-target='#kt_modal_create_app'
+            id='kt_toolbar_primary_button'
+          >
+            
+            Submit Token
+          </a>
+          {/* <button className='btn btn-primary btn-sm mt-5'>Submit token</button> */}
         </div>
       {/* end::Body */}
     </a>

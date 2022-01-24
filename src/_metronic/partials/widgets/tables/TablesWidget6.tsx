@@ -1,12 +1,111 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react'
-import {KTSVG, toAbsoluteUrl} from '../../../helpers'
+import React, { useEffect, useState } from 'react'
+import { KTSVG, toAbsoluteUrl } from '../../../helpers'
 
 type Props = {
   className: string
 }
 
-const TablesWidget6: React.FC<Props> = ({className}) => {
+const TablesWidget6: React.FC<Props> = ({ className }) => {
+  const [coinList, setCoinList] = useState([]);
+  const [metric, setMetricData] = useState('24h');
+
+
+  useEffect(() => {
+    loadTrendingTokens('24h')
+  }, [])
+
+  const setMetric = (data: string) => {
+    setMetricData(data)
+    loadTrendingTokens(data)
+  }
+
+  const loadTrendingTokens = async (timeframe:string) => {
+    const response = await fetch('https://api.coinmarketcap.com/data-api/v3/topsearch/rank?timeframe='+timeframe);
+    const data = await response.json();
+    console.log(data.data.cryptoTopSearchRanks)
+    await setCoinList(data.data.cryptoTopSearchRanks)
+
+  }
+
+  const renderList = coinList.map((item, index, category) => {
+    if (index > 8) return
+    let pricePercentage = 0
+    //@ts-ignore
+    if (metric === '24h') pricePercentage = item.priceChange.priceChange24h.toFixed(2)
+    //@ts-ignore
+    else if (metric === '7d') pricePercentage = item.priceChange.priceChange7d.toFixed(2)
+    //@ts-ignore
+    else if (metric === '30d') pricePercentage = item.priceChange.priceChange30d.toFixed(2)
+    //@ts-ignore
+    let imageUrl = 'https://s2.coinmarketcap.com/static/img/coins/64x64/' + item.id + '.png'
+    return (
+      <tr>
+        <td>
+          <div className='symbol symbol-50px me-2'>
+            <span className='symbol-label'>
+              <img
+                //@ts-ignore
+                src={imageUrl}
+                className='h-75 align-self-end'
+                alt=''
+              />
+            </span>
+          </div>
+        </td>
+        <td>
+          <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+            {
+              //@ts-ignore
+              item.symbol}
+          </a>
+          <span className='text-muted fw-bold d-block'>{
+            //@ts-ignore
+            item.name}</span>
+        </td>
+        {/* <td>
+                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
+                      <span className='text-dark fw-bolder d-block fs-5'>$200,500</span>
+                    </td> */}
+        <td className='text-end'>
+          {
+            //@ts-ignore
+            pricePercentage < 0 ?
+              <span className='text-danger fs-7 fw-bolder'>{
+                //@ts-ignore
+                pricePercentage}%</span>
+              :
+              <span className='text-success fs-7 fw-bolder'>{
+                //@ts-ignore
+                pricePercentage}%</span>
+          }
+
+        </td>
+        <td className='text-end'>
+          <a
+            className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
+          >
+            {
+              pricePercentage > 0 ?
+              <KTSVG
+              path='/media/icons/duotune/arrows/arr062.svg'
+              className='svg-icon-2 svg-icon-success'
+            />
+            :
+            <KTSVG
+              path='/media/icons/duotune/arrows/arr065.svg'
+              className='svg-icon-2 svg-icon-danger'
+            />
+            }
+           
+          </a>
+        </td>
+      </tr>
+    )
+  }
+  );
+
+
   return (
     <div className={`card ${className}`}>
       {/* begin::Header */}
@@ -22,8 +121,9 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary active fw-bolder px-4 me-1'
                 data-bs-toggle='tab'
                 href='#kt_table_widget_6_tab_1'
+                onClick={()=>{setMetric('24h')}}
               >
-                Month
+                Day
               </a>
             </li>
             <li className='nav-item'>
@@ -31,6 +131,7 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4 me-1'
                 data-bs-toggle='tab'
                 href='#kt_table_widget_6_tab_2'
+                onClick={()=>{setMetric('7d')}}
               >
                 Week
               </a>
@@ -40,8 +141,9 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 href='#kt_table_widget_6_tab_3'
+                onClick={()=>{setMetric('30d')}}
               >
-                Day
+                Month
               </a>
             </li>
           </ul>
@@ -69,339 +171,7 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 {/* end::Table head */}
                 {/* begin::Table body */}
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/14911.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        MetaDoge
-                      </a>
-                      <span className='text-muted fw-bold d-block'>MetaDoge</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$200,500</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>+28%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/16426.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Doge Run
-                      </a>
-                      <span className='text-muted fw-bold d-block'>DRUN</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$200,500</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-danger fs-7 fw-bolder'>-10%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/15985.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Mongoose
-                      </a>
-                      <span className='text-muted fw-bold d-block'>MONGOOSE</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$1,200,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>+52%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/10586.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Taboo Token
-                      </a>
-                      <span className='text-muted fw-bold d-block'>TABOO</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$1,200,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>+42%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/16500.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        ShibaDoge
-                      </a>
-                      <span className='text-muted fw-bold d-block'>SHIBDOGE</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$3,400,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-danger fs-7 fw-bolder'>-34%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/13619.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Spooky Shiba
-                      </a>
-                      <span className='text-muted fw-bold d-block'>SPOOKYSHIBA</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$35,600,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-danger fs-7 fw-bolder'>-230%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/16463.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        OpenDAO
-                      </a>
-                      <span className='text-muted fw-bold d-block'>SOS</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$35,600,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>+230%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src='https://s2.coinmarketcap.com/static/img/coins/64x64/5994.png'
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        SHIBA INU
-                      </a>
-                      <span className='text-muted fw-bold d-block'>SHIB</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$35,600,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-danger fs-7 fw-bolder'>-230%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/043-boy-18.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        EverBNB
-                      </a>
-                      <span className='text-muted fw-bold d-block'>EVERBNB</span>
-                    </td>
-                    {/* <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$35,600,000</span>
-                    </td> */}
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>+230%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
+                  {coinList ? renderList : null}
                 </tbody>
                 {/* end::Table body */}
               </table>
@@ -414,11 +184,11 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
             {/* begin::Table container */}
             <div className='table-responsive'>
               {/* begin::Table */}
-              <table className='table align-middle gs-0 gy-3'>
+              <table className='table align-middle gs-0 gy-1'>
                 {/* begin::Table head */}
                 <thead>
                   <tr>
-                    <th className='p-0 w-50px'></th>
+                    <th className='p-3 w-50px'></th>
                     <th className='p-0 min-w-150px'></th>
                     <th className='p-0 min-w-140px'></th>
                     <th className='p-0 min-w-120px'></th>
@@ -427,117 +197,7 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 {/* end::Table head */}
                 {/* begin::Table body */}
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/018-girl-9.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Jessie Clarcson
-                      </a>
-                      <span className='text-muted fw-bold d-block'>HTML, CSS Coding</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$1,200,000</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-warning fs-7 fw-bolder'>+52%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/014-girl-7.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Natali Trump
-                      </a>
-                      <span className='text-muted fw-bold d-block'>UI/UX Designer</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$3,400,000</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>-34%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/001-boy.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Brad Simmons
-                      </a>
-                      <span className='text-muted fw-bold d-block'>Successful Fellas</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$200,500</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-primary fs-7 fw-bolder'>+28%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
+                 {renderList}
                 </tbody>
                 {/* end::Table body */}
               </table>
@@ -550,11 +210,11 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
             {/* begin::Table container */}
             <div className='table-responsive'>
               {/* begin::Table */}
-              <table className='table align-middle gs-0 gy-3'>
+              <table className='table align-middle gs-0 gy-1'>
                 {/* begin::Table head */}
                 <thead>
                   <tr>
-                    <th className='p-0 w-50px'></th>
+                    <th className='p-3 w-50px'></th>
                     <th className='p-0 min-w-150px'></th>
                     <th className='p-0 min-w-140px'></th>
                     <th className='p-0 min-w-120px'></th>
@@ -563,154 +223,7 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
                 {/* end::Table head */}
                 {/* begin::Table body */}
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/047-girl-25.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Jessie Clarcson
-                      </a>
-                      <span className='text-muted fw-bold d-block'>HTML, CSS Coding</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$1,200,000</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-danger fs-7 fw-bolder'>+52%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/014-girl-7.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Natali Trump
-                      </a>
-                      <span className='text-muted fw-bold d-block'>UI/UX Designer</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$3,400,000</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-success fs-7 fw-bolder'>-34%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/043-boy-18.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Kevin Leonard
-                      </a>
-                      <span className='text-muted fw-bold d-block'>Art Director</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$35,600,000</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-info fs-7 fw-bolder'>+230%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div className='symbol symbol-50px me-2'>
-                        <span className='symbol-label'>
-                          <img
-                            src={toAbsoluteUrl('/media/svg/avatars/001-boy.svg')}
-                            className='h-75 align-self-end'
-                            alt=''
-                          />
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                        Brad Simmons
-                      </a>
-                      <span className='text-muted fw-bold d-block'>Successful Fellas</span>
-                    </td>
-                    <td>
-                      <span className='text-muted fw-bold d-block fs-7'>Paid</span>
-                      <span className='text-dark fw-bolder d-block fs-5'>$200,500</span>
-                    </td>
-                    <td className='text-end'>
-                      <span className='text-primary fs-7 fw-bolder'>+28%</span>
-                    </td>
-                    <td className='text-end'>
-                      <a
-                        href='#'
-                        className='btn btn-sm btn-icon btn-bg-light btn-active-color-primary'
-                      >
-                        <KTSVG
-                          path='/media/icons/duotune/arrows/arr064.svg'
-                          className='svg-icon-2'
-                        />
-                      </a>
-                    </td>
-                  </tr>
+                 {renderList}
                 </tbody>
                 {/* end::Table body */}
               </table>
@@ -725,4 +238,4 @@ const TablesWidget6: React.FC<Props> = ({className}) => {
   )
 }
 
-export {TablesWidget6}
+export { TablesWidget6 }

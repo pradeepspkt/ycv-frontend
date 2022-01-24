@@ -24,8 +24,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   useEffect(() => {
     main()
 
-    console.log(store)
-
   }, [])
 
   const getIP = async () => {
@@ -65,7 +63,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const addVote = async (id: any) => {
-    console.log(id)
     const docRef = doc(db, "coins", id);
     const docSnap = await getDoc(docRef);
     let count: any = null
@@ -96,9 +93,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     for (let i = 0; i < coins.length; i++) {
       let coinSymbol = (coins[i].symbol).toUpperCase()
       let status = 1
-      console.log(coinSymbol)
       if (await voteList.includes(coinSymbol)) {
-        console.log(coinSymbol + ' Found')
         status = 0
       }
       coins[i].vote = status
@@ -116,6 +111,13 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
 
   const submitVote = async (coin: string, index: number, id: string) => {
+    setCoinList([])
+    let tempCoins = await coinList
+    //@ts-ignore
+    tempCoins[index].vote = 2
+    await setCoinList(tempCoins)
+    await renderList
+
     toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
       position: "bottom-right",
       icon: "🚀",
@@ -126,11 +128,10 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
       draggable: true,
       progress: undefined,
     });
-    // let coins = await promotedList
-    // //@ts-ignore
-    // coins[index].vote = 2
-    // await setPromotedList(coins)
-    // console.log(promotedList)
+    let coins = await coinList
+    //@ts-ignore
+    coins[index].vote = 2
+    await setCoinList(coins)
     await addToVoteList(myIP, coin)
     await addVote(id)
     await main()
@@ -158,7 +159,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
 
   const renderList = coinList.map((item, index) => {
-    if (index > 9) return
+    if (index > 9 && !hideViewAllButton) return
     return (
       <tr>
         <td>
@@ -222,6 +223,7 @@ $308,236,260
         //@ts-ignore
         item.vote ? 'VOTE' : 'VOTED'}
     </button> */}
+          
 
           {
             //@ts-ignore
@@ -242,8 +244,8 @@ $308,236,260
           {
             //@ts-ignore
             item.vote == 2 &&
-            <button type='submit' className='btn btn-sm btn-default' data-kt-menu-dismiss='true'>
-              Voting In Progress
+            <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+              Voting..
             </button>
           }
 

@@ -61,7 +61,6 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const addVote = async (id: any) => {
-    console.log(id)
     const docRef = doc(db, "coins", id);
     const docSnap = await getDoc(docRef);
     let count: any = null
@@ -92,9 +91,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     for (let i = 0; i < coins.length; i++) {
       let coinSymbol = (coins[i].symbol).toUpperCase()
       let status = 1
-      console.log(coinSymbol)
       if (await voteList.includes(coinSymbol)) {
-        console.log(coinSymbol + ' Found')
         status = 0
       }
       coins[i].vote = status
@@ -110,8 +107,13 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setLoading(1)
   }
 
-
   const submitVote = async (coin: string, index: number, id:string) => {
+    setPromotedList([])
+    let tempCoins = await promotedList
+    //@ts-ignore
+    tempCoins[index].vote = 2
+    await setPromotedList(tempCoins)
+    // await renderList
     toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
       position: "bottom-right",
       icon: "🚀",
@@ -142,7 +144,6 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
       progress: undefined,
     });
   }
-
 
   const renderList = promotedList.map((item, index) => {
     if (index > 5 && !hideViewAllButton) return
@@ -220,8 +221,8 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
             {
               //@ts-ignore
               item.vote == 2 &&
-              <button type='submit' className='btn btn-sm btn-default' data-kt-menu-dismiss='true'>
-                Voting In Progress
+              <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+                Voting..
               </button>
             }
 
