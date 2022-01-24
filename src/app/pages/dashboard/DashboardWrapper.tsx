@@ -93,17 +93,13 @@ const DashboardPage: FC = () => (
               iconColor='primary'
               title='Advertisement banner'
               description='Banner goes here'
-
             />
           </div>
         </div>
         <div className='row'>
           <TablesWidget12 className='card-xxl-stretch mb-5 mb-xl-8' />
         </div>
-
       </div>
-
-
     </div>
 
     {/* end::Row */}
@@ -139,9 +135,6 @@ const DashboardPage: FC = () => (
         />
       </div>
     </div>
-
-
-
 
     {/* <div className='row'>
       <div className='col-xl-4'>

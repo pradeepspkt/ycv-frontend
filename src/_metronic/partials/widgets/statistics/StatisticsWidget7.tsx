@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react'
-import {KTSVG, toAbsoluteUrl} from '../../../helpers'
+import React, { useEffect, useState } from 'react'
+import { KTSVG } from '../../../helpers'
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc } from "firebase/firestore";
+import { app, db } from '../../../../firebase';
 
 type Props = {
   className: string
@@ -19,11 +21,29 @@ const StatisticsWidget7: React.FC<Props> = ({
   title,
   description,
 }) => {
+  const [ad, setAd] = useState('');
+
+  useEffect(() => {
+    loadAd()
+  }, [])
+
+  const loadAd = async () => {
+    const docRef = doc(db, "advertisement", 'haROiOvanHBJ7KsJEkXb');
+    const docSnap = await getDoc(docRef);
+    let image: any = ''
+    if (docSnap.exists()) {
+      //@ts-ignore
+      image = docSnap.data()
+      await setAd(image)
+    }
+  }
   return (
-    <a href='#' className={`card bg-${color} hoverable ${className} border border-gray-300`}>
+    //@ts-ignore
+    <a href={ad.adLink} className={`card bg-${color} hoverable ${className} border border-gray-100`} target='_blank'>
       {/* begin::Body */}
       <img
-                          src={toAbsoluteUrl('/media/banner/side-gif.gif')}
+      //@ts-ignore
+                          src={ad.image}
                           height='100px'
                           width='100%'
                           className='h-150px align-self-end'

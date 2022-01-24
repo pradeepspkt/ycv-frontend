@@ -20,7 +20,7 @@ const Topbar: FC = () => {
         {/* Activities */}
         <div className={clsx('d-flex align-items-center ', toolbarButtonMarginClass)}>
           {/* begin::Drawer toggle */}
-          <a href='#' className='btn btn-icon btn-light-facebook btn-sm'>
+          <a href='https://www.facebook.com/Yourcryptovoice-111182091465651' className='btn btn-icon btn-light-twitter btn-sm me-1' target='_blank'>
             <i className='bi bi-facebook fs-2'></i>
           </a>
           {/* <div
@@ -40,7 +40,7 @@ const Topbar: FC = () => {
         </div>
         <div className={clsx('d-flex align-items-center ', toolbarButtonMarginClass)}>
           {/* begin::Drawer toggle */}
-          <a href='#' className='btn btn-icon btn-light-facebook btn-sm'>
+          <a href='https://www.instagram.com/yourcryptovoice/' className='btn btn-icon btn-light-twitter btn-sm me-1' target='_blank'>
             <i className='bi bi-instagram fs-2'></i>
           </a>
           {/* <div
@@ -61,7 +61,7 @@ const Topbar: FC = () => {
         <div className={clsx('d-flex align-items-center ', toolbarButtonMarginClass)}>
           {/* begin::Drawer toggle */}
           
-          <a href='#' className='btn btn-icon btn-light-twitter btn-sm me-3'>
+          <a href='https://mobile.twitter.com/yourcryptovoic' className='btn btn-icon btn-light-twitter btn-sm me-1' target='_blank'>
             <i className='bi bi-twitter fs-2'></i>
           </a>
          
@@ -82,8 +82,8 @@ const Topbar: FC = () => {
         </div>
         <div className={clsx('d-flex align-items-center ', toolbarButtonMarginClass)}>
           {/* begin::Drawer toggle */}
-          <a href='#' className='btn btn-icon btn-light-twitter btn-sm me-1'>
-            <i className='bi bi-linkedin fs-2'></i>
+          <a href='https://t.me/yourcryptovoic' className='btn btn-icon btn-light-twitter btn-sm me-1' target='_blank'>
+            <i className='bi bi-telegram fs-2'></i>
           </a>
          
           {/* <div
