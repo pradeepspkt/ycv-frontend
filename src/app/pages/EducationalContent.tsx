@@ -91,7 +91,7 @@ const EducationalContent: React.FC<Props> = ({
                             /> */}
                             <div className="d-flex flex-column-fluid flex-center">
                                 <CradleLoader
-                                    arialLabel="loading-indicator"
+                                    // arialLabel="loading-indicator"
                                     // height="150"
                                     // width="150"
                                     // color='#ef305e'

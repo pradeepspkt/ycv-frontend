@@ -84,7 +84,7 @@ const BlogNews: React.FC<Props> = ({
                         renderBlogs : 
                         <div className="d-flex flex-column-fluid flex-center">
                                 <CradleLoader
-                                    arialLabel="loading-indicator"
+                                    // ariaLabel="loading-indicator"
                                     // height="150"
                                     // width="150"
                                     // color='#ef305e'
