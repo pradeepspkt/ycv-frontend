@@ -1,0 +1,14 @@
+{
+    "redirects": [
+        {
+            "source": "/",
+            "destination": "/yourcryptovoice"
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/yourcryptovoice/**",
+            "destination": "/yourcryptovoice/index.html"
+        }
+    ]
+}

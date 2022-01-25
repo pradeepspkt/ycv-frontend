@@ -2,7 +2,7 @@
   "name": "demo2",
   "version": "8.0.32",
   "private": true,
-  "homepage": "/yourcryptovoice/",
+  "homepage": "http://137.184.204.235:8000/yourcryptovoice",
   "dependencies": {
     "@formatjs/intl-pluralrules": "^4.0.28",
     "@formatjs/intl-relativetimeformat": "^9.1.7",
