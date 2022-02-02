@@ -8,6 +8,7 @@ import {EducationalContent} from '../pages/EducationalContent'
 import {ContentDetail} from '../pages/ContentDetail'
 import {AllCoins} from '../pages/AllCoins'
 import {PromotedCoinsList} from '../pages/PromotedCoinsList'
+import {CoinDetails} from '../pages/CoinDetails'
 
 
 export function PrivateRoutes() {
@@ -33,6 +34,7 @@ export function PrivateRoutes() {
         <Route path='/educational-content' component={EducationalContent} />
         <Route path='/details' component={ContentDetail} />
         <Route path='/all-coins' component={AllCoins} />
+        <Route path='/coin-details/:id' component={CoinDetails} />
         <Route path='/promoted-coins' component={PromotedCoinsList} />
         <Redirect from='/auth' to='/dashboard' />
         <Redirect exact from='/' to='/dashboard' />

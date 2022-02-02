@@ -163,6 +163,37 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     return (
       <tr>
         <td>
+            <div className='d-flex align-items-center'>
+              <div className='symbol symbol-50px me-5'>
+                <span className='symbol-label bg-light'>
+                  <img
+                    //@ts-ignore
+                    src={item.avatar}
+                    className='h-75 align-self-end'
+                    alt=''
+                  />
+                </span>
+              </div>
+              <div className='d-flex justify-content-start flex-column'>
+                <a href={
+                  //@ts-ignore
+                  '/coin-details/' + item.symbol
+                } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+                  {
+                    //@ts-ignore
+                    item.symbol.toUpperCase()
+                  }
+                </a>
+                {/* <span className='text-muted fw-bold text-muted d-block fs-7'>
+                  {
+                    //@ts-ignore
+                    item.name.toUpperCase()
+                  }
+                </span> */}
+              </div>
+            </div>
+          </td>
+        {/* <td>
           <div className='d-flex align-items-center'>
             <div className='symbol symbol-50px me-5'>
               <span className='symbol-label bg-light'>
@@ -176,19 +207,22 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
             </div>
 
           </div>
-        </td>
-        <td>
+        </td> */}
+        <td className="d-none d-lg-table-cell">
           <div className='d-flex justify-content-start flex-column mt-4'>
-            <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+            <a href={
+              //@ts-ignore
+              '/coin-details/'+item.symbol
+              } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
               {
                 //@ts-ignore
-                item.symbol.toUpperCase()
+                item.name.toUpperCase()
               }
             </a>
 
           </div>
         </td>
-        <td>
+        {/* <td className="d-none d-lg-table-cell">
           <div className='d-flex justify-content-start flex-column'>
             <span className='text-hover-primary mt-4 '>
               {
@@ -199,14 +233,14 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
           </div>
 
-        </td>
+        </td> */}
         {/* <td>
     <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
   0.0087$
 </a>
     <span className='text-dark fw-bold text-dark d-block fs-7'>$0.0...02877</span>
   </td> */}
-        <td>
+        <td className="d-none d-lg-table-cell">
           {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
 $308,236,260
 </a> */}
@@ -214,9 +248,7 @@ $308,236,260
             //@ts-ignore
             item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
         </td>
-        <td><span className="badge badge-square badge-success fs-6 p-3 mt-4">{
-          //@ts-ignore
-          item.votes}</span></td>
+        
         <td>
           {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
       {
@@ -229,16 +261,29 @@ $308,236,260
             //@ts-ignore
             item.vote == 1 &&
             //@ts-ignore
-            <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { submitVote(item.symbol, index, item.id) }}>
-              VOTE !
-            </button>
+            <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
+            <button type="button" disabled className="btn btn-default btn-sm"><b>{
+              //@ts-ignore
+              item.votes}</b></button>
+             <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { 
+               //@ts-ignore
+               submitVote(item.symbol, index, item.id) 
+               }}>
+            VOTE !
+          </button>
+          </div>
           }
           {
             //@ts-ignore
             item.vote == 0 &&
-            <button type='submit' disabled className='btn btn-sm btn-secondary' data-kt-menu-dismiss='true'>
-              VOTED
-            </button>
+            <div className="btn-group border border-success rounded"  role="group" aria-label="Basic example">
+            <button type="button" disabled className="btn btn-default btn-sm">{
+              //@ts-ignore
+              item.votes}</button>
+            <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+          VOTED
+        </button>
+          </div>
 
           }
           {
@@ -296,13 +341,13 @@ $308,236,260
             {/* begin::Table head */}
             <thead>
               <tr className='fw-bolder text-muted fw-bold fs-6 text-gray-800 border border-gray-200 h-50px pb-5 bg-light'>
-                <th className='min-w-100px'>Avatar</th>
-                <th className='min-w-200px'>Symbol</th>
-                <th className='min-w-200px'>Name</th>
-                <th className='min-w-200px'>Market Cap</th>
+                {/* <th className='min-w-100px'>Avatar</th> */}
+                <th className='min-w-200px'>Coin</th>
+                <th className='min-w-250px d-none d-lg-table-cell'>Name</th>
+                <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>
                 {/* <th className='min-w-100px'>Price</th> */}
-                <th className='min-w-200px'>Votes</th>
-                <th className='min-w-10px text-start rounded-end'>Action</th>
+                {/* <th className='min-w-200px'>Votes</th> */}
+                <th className='min-w-10px text-start rounded-end'>Votes</th>
 
               </tr>
             </thead>

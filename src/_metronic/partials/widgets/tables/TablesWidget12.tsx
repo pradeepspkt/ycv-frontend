@@ -52,7 +52,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
       await updateDoc(docRef, {
         coin: voteData
       });
-    }else{
+    } else {
       voteData.push(symbol.toUpperCase())
       await setDoc(doc(db, "voterIP", myIP), {
         coin: voteData
@@ -107,7 +107,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setLoading(1)
   }
 
-  const submitVote = async (coin: string, index: number, id:string) => {
+  const submitVote = async (coin: string, index: number, id: string) => {
     setPromotedList([])
     let tempCoins = await promotedList
     //@ts-ignore
@@ -163,7 +163,10 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
                 </span>
               </div>
               <div className='d-flex justify-content-start flex-column'>
-                <a href='#' className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+                <a href={
+                  //@ts-ignore
+                  '/coin-details/' + item.symbol
+                } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
                   {
                     //@ts-ignore
                     item.symbol.toUpperCase()
@@ -184,7 +187,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     </a>
         <span className='text-dark fw-bold text-dark d-block fs-7'>$0.0...02877</span>
       </td> */}
-          <td>
+          <td className="d-none d-lg-table-cell">
             {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
     $308,236,260
     </a> */}
@@ -192,9 +195,6 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
               //@ts-ignore
               item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
           </td>
-          <td><span className="badge badge-square badge-success fs-6 p-3">{
-            //@ts-ignore
-            item.votes}</span></td>
           <td>
             {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
           {
@@ -202,20 +202,42 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
             item.vote ? 'VOTE' : 'VOTED'}
         </button> */}
 
+            {/* <span className="badge badge-square badge-success fs-6 p-6">{
+              //@ts-ignore
+              item.votes}</span> */}
             {
               //@ts-ignore
               item.vote == 1 &&
               //@ts-ignore
-              <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { submitVote(item.symbol, index, item.id) }}>
-                VOTE !
-              </button>
+              <>
+                <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
+                  <button type="button" disabled className="btn btn-default btn-sm"><b>{
+                    //@ts-ignore
+                    item.votes}</b></button>
+                   <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { 
+                     //@ts-ignore
+                     submitVote(item.symbol, index, item.id) 
+                     }}>
+                  VOTE !
+                </button>
+                </div>
+               
+              </>
             }
             {
               //@ts-ignore
               item.vote == 0 &&
-              <button type='submit' disabled className='btn btn-sm btn-secondary' data-kt-menu-dismiss='true'>
+              <>
+               <div className="btn-group border border-success rounded"  role="group" aria-label="Basic example">
+                  <button type="button" disabled className="btn btn-default btn-sm">{
+                    //@ts-ignore
+                    item.votes}</button>
+                  <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
                 VOTED
               </button>
+                </div>
+              </>
+              
 
             }
             {
@@ -240,6 +262,11 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
               VOTED
             </button>
             } */}
+
+
+            {/* <button type="button" className="btn btn-primary">
+  Vote <span className="badge badge-light">4</span>
+</button> */}
           </td>
         </tr>
       </>
@@ -338,9 +365,8 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
               <tr className='fw-bolder bg-light h-50px'>
                 <th className='ps-4 min-w-200px rounded-start'>Name</th>
                 {/* <th className='min-w-125px'>Price</th> */}
-                <th className='min-w-200px'>Market Cap</th>
+                <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>
                 <th className='min-w-150px'>Votes</th>
-                <th className='min-w-80px rounded-end'>Action</th>
               </tr>
             </thead>
             {/* end::Table head */}

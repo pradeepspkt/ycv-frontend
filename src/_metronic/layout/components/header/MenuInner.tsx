@@ -10,6 +10,7 @@ export function MenuInner() {
     <>
       <MenuItem title="HOME" to='/dashboard' />
       <MenuItem title='BLOG' to='/blog-news' />
+      {/* <MenuItem title='Details' to='/coin-details' /> */}
       <MenuItem title='LEARNING' to='/educational-content' />
       {/* <MenuItem title='ROADMAP' to='' /> */}
 
