@@ -181,6 +181,11 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
               </div>
             </div>
           </td>
+          <td className="d-none d-lg-table-cell">
+            {
+            //@ts-ignore
+            item.network? item.network.toUpperCase(): 'NA'}
+          </td>
           {/* <td>
         <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
       0.0087$
@@ -284,6 +289,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
           <span className='text-muted mt-1 fw-bold fs-7'>Tokens we recommend</span>
         </h3>
         <div className='card-toolbar'>
+        
           {/* begin::Menu */}
           <button
             type='button'
@@ -364,6 +370,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
             <thead>
               <tr className='fw-bolder bg-light h-50px'>
                 <th className='ps-4 min-w-200px rounded-start'>Name</th>
+                <th className='ps-4 min-w-200px rounded-start d-none d-lg-table-cell'>Network</th>
                 {/* <th className='min-w-125px'>Price</th> */}
                 <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>
                 <th className='min-w-150px'>Votes</th>

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react'
 import { KTSVG, toAbsoluteUrl } from '../../../helpers'
-import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc, where } from "firebase/firestore";
 import { app, db } from '../../../../firebase';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link } from 'react-router-dom'
@@ -19,6 +19,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const [myIP, setIP] = useState('');
   const [voteList, setVoteList] = useState([]);
   const [loading, setLoading] = useState(0);
+  // const [selectedNetwork, setNetwork] = useState('BSC')
   const { store } = useContext(ReactReduxContext)
 
   useEffect(() => {
@@ -109,7 +110,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setLoading(1)
   }
 
-
   const submitVote = async (coin: string, index: number, id: string) => {
     setCoinList([])
     let tempCoins = await coinList
@@ -148,7 +148,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     });
   }
 
-
   function round(val: any, multiplesOf: any) {
     var s = 1 / multiplesOf;
     var res = Math.ceil(val * s) / s;
@@ -157,42 +156,58 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     return parseFloat(res.toFixed(afterZero ? afterZero.length : 0));
   }
 
+  const setNetwork = async (network: string) => {
+    let listTemp: any = []
+    const q = query(collection(db, "coins"), where("network", "==", network));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      await listTemp.push({
+        ...doc.data(),
+        id: doc.id,
+      })
+    });
+    let voteList = await getVoteList(myIP)
+    let coins = listTemp
+    await populateVotes(coins, voteList)
+    await setCoinList(listTemp)
+  }
 
   const renderList = coinList.map((item, index) => {
     if (index > 9 && !hideViewAllButton) return
     return (
       <tr>
         <td>
-            <div className='d-flex align-items-center'>
-              <div className='symbol symbol-50px me-5'>
-                <span className='symbol-label bg-light'>
-                  <img
-                    //@ts-ignore
-                    src={item.avatar}
-                    className='h-75 align-self-end'
-                    alt=''
-                  />
-                </span>
-              </div>
-              <div className='d-flex justify-content-start flex-column'>
-                <a href={
+          <div className='d-flex align-items-center'>
+            <div className='symbol symbol-50px me-5'>
+              <span className='symbol-label bg-light'>
+                <img
                   //@ts-ignore
-                  '/coin-details/' + item.symbol
-                } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                  {
-                    //@ts-ignore
-                    item.symbol.toUpperCase()
-                  }
-                </a>
-                {/* <span className='text-muted fw-bold text-muted d-block fs-7'>
+                  src={item.avatar}
+                  className='h-75 align-self-end'
+                  alt=''
+                />
+              </span>
+            </div>
+            <div className='d-flex justify-content-start flex-column'>
+              <a href={
+                //@ts-ignore
+                '/coin-details/' + item.symbol
+              } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+                {
+                  //@ts-ignore
+                  item.symbol.toUpperCase()
+                }
+              </a>
+              {/* <span className='text-muted fw-bold text-muted d-block fs-7'>
                   {
                     //@ts-ignore
                     item.name.toUpperCase()
                   }
                 </span> */}
-              </div>
             </div>
-          </td>
+          </div>
+        </td>
         {/* <td>
           <div className='d-flex align-items-center'>
             <div className='symbol symbol-50px me-5'>
@@ -212,8 +227,8 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
           <div className='d-flex justify-content-start flex-column mt-4'>
             <a href={
               //@ts-ignore
-              '/coin-details/'+item.symbol
-              } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+              '/coin-details/' + item.symbol
+            } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
               {
                 //@ts-ignore
                 item.name.toUpperCase()
@@ -241,6 +256,11 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     <span className='text-dark fw-bold text-dark d-block fs-7'>$0.0...02877</span>
   </td> */}
         <td className="d-none d-lg-table-cell">
+          {
+            //@ts-ignore
+            item.network ? item.network.toUpperCase() : 'NA'}
+        </td>
+        <td className="d-none d-lg-table-cell">
           {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
 $308,236,260
 </a> */}
@@ -248,42 +268,42 @@ $308,236,260
             //@ts-ignore
             item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
         </td>
-        
+
         <td>
           {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
       {
         //@ts-ignore
         item.vote ? 'VOTE' : 'VOTED'}
     </button> */}
-          
+
 
           {
             //@ts-ignore
             item.vote == 1 &&
             //@ts-ignore
             <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
-            <button type="button" disabled className="btn btn-default btn-sm"><b>{
-              //@ts-ignore
-              item.votes}</b></button>
-             <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { 
-               //@ts-ignore
-               submitVote(item.symbol, index, item.id) 
-               }}>
-            VOTE !
-          </button>
-          </div>
+              <button type="button" disabled className="btn btn-default btn-sm"><b>{
+                //@ts-ignore
+                item.votes}</b></button>
+              <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => {
+                //@ts-ignore
+                submitVote(item.symbol, index, item.id)
+              }}>
+                VOTE !
+              </button>
+            </div>
           }
           {
             //@ts-ignore
             item.vote == 0 &&
-            <div className="btn-group border border-success rounded"  role="group" aria-label="Basic example">
-            <button type="button" disabled className="btn btn-default btn-sm">{
-              //@ts-ignore
-              item.votes}</button>
-            <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-          VOTED
-        </button>
-          </div>
+            <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
+              <button type="button" disabled className="btn btn-default btn-sm">{
+                //@ts-ignore
+                item.votes}</button>
+              <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
+                VOTED
+              </button>
+            </div>
 
           }
           {
@@ -313,8 +333,102 @@ $308,236,260
           data-bs-toggle='tooltip'
           data-bs-placement='top'
           data-bs-trigger='hover'
-          title='Click to add a user'
-        >{
+          title='Select network'
+        >
+
+          <ul className='nav'>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary active fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { main() }}
+              >
+                All
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4 me-1'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_1'
+                onClick={() => { setNetwork('BSC') }}
+              >
+                BSC
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4 me-1'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_2'
+                onClick={() => { setNetwork('ETH') }}
+              >
+                ETH
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('MATIC') }}
+              >
+                MATIC
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('TRX') }}
+              >
+                TRX
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('FTM') }}
+              >
+                FTM
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('SOL') }}
+              >
+                SOL
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('KCC') }}
+              >
+                KCC
+              </a>
+            </li>
+            <li className='nav-item'>
+              <a
+                className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
+                data-bs-toggle='tab'
+                // href='#kt_table_widget_6_tab_3'
+                onClick={() => { setNetwork('Other') }}
+              >
+                Other
+              </a>
+            </li>
+          </ul>
+          {
             hideViewAllButton ?
               null :
               <Link to="/all-coins" className="btn btn-sm btn-light-primary"> <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
@@ -344,6 +458,8 @@ $308,236,260
                 {/* <th className='min-w-100px'>Avatar</th> */}
                 <th className='min-w-200px'>Coin</th>
                 <th className='min-w-250px d-none d-lg-table-cell'>Name</th>
+                <th className='ps-4 min-w-200px rounded-start d-none d-lg-table-cell'>Network</th>
+
                 <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>
                 {/* <th className='min-w-100px'>Price</th> */}
                 {/* <th className='min-w-200px'>Votes</th> */}
@@ -354,7 +470,12 @@ $308,236,260
             {/* end::Table head */}
             {/* begin::Table body */}
             <tbody>
-              {renderList}
+              {renderList.length > 0 ?
+              renderList 
+            :
+            <div className='m-5 mt-5 mb-5'>
+            Coins not found.
+            </div>}
               {/* <tr>
                 <td>
                   <div className='form-check form-check-sm form-check-custom form-check-solid'>

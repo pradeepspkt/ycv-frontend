@@ -29,7 +29,10 @@ interface ICreateAccount {
   cardExpiryMonth: string
   cardExpiryYear: string
   cardCvv: string
-  saveCard: string
+  saveCard: string,
+  discordLink: string,
+  telegramLink: string,
+  contractAddress: string
 }
 
 const inits: ICreateAccount = {
@@ -49,19 +52,23 @@ const inits: ICreateAccount = {
   cardExpiryYear: '2025',
   cardCvv: '123',
   saveCard: '1',
+  discordLink: '',
+  telegramLink: '',
+  contractAddress: ''
 }
 
 const createAppSchema = [
   Yup.object({
     appName: Yup.string().required().label('Coin name'),
     symbol: Yup.string().required().label('Symbol'),
-    mCap: Yup.string().required().label('Market cap'),
+    mCap: Yup.string().label('Market cap'),
+    contractAddress: Yup.string().required().label('Contract Address'),
   }),
   Yup.object({
     description: Yup.string().required().label('Description'),
   }),
   Yup.object({
-    chartLink: Yup.string().required().label('Chart Link'),
+    chartLink: Yup.string().label('Chart Link'),
     webLink: Yup.string().required().label('Website Link'),
   }),
 ]
@@ -76,12 +83,18 @@ const Main: FC = () => {
   const [snackMsg, setSnackMsg] = useState('');
 
   const [tokenName, setTokenName] = useState('');
+  const [discordLink, setDiscordLink] = useState('');
+  const [contractAddress, setContractAddress] = useState('');
+  const [telegramLink, setTelegramLink] = useState('');
   const [symbol, setSymbol] = useState('');
+  const [network, setNetwork] = useState('BSC');
   const [mCap, setMCap] = useState('');
   const [description, setDescription] = useState('');
   const [chartlink, setChartLink] = useState('');
   const [websiteLink, setWebsiteLink] = useState('');
   const [tokenLogo, setTokenLogo] = useState('');
+  const [checkbox, setCheckbox] = useState('0');
+
 
   const [file, setFile] = useState(null);
   const [imageURL, setURL] = useState("");
@@ -93,6 +106,15 @@ const Main: FC = () => {
   // function handleChange(e:any) {
   //   setFile(e.target.files[0]);
   // }
+
+  // change: function(event) {
+  //   this.setState({ value: event.target.value });
+  // },
+
+  const selectChange = async(event) => {
+    await setNetwork(event.target.value)
+    console.log(network)
+  }
 
 
   const toggleShowSnack = () => setShowSnack(!showSnack);
@@ -133,6 +155,8 @@ const Main: FC = () => {
     setTokenName(values.appName)
     // setTokenLogo(file)
     setMCap(values.mCap)
+    setContractAddress(values.contractAddress)
+    setDiscordLink(values.discordLink)
     setChartLink(values.chartLink)
     setWebsiteLink(values.webLink)
     setDescription(values.description)
@@ -202,6 +226,10 @@ const Main: FC = () => {
               chartlink: values.chartLink,
               description: values.description,
               symbol: values.symbol,
+              discordLink: values.discordLink,
+              telegramLink: values.telegramLink,
+              contractAddress: values.contractAddress,
+              network: network,
               status: 'pending',
               votes: 0,
               avatar: downloadURL
@@ -398,7 +426,7 @@ const Main: FC = () => {
                           </div>
                           <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                              <span className='required'>Market Cap</span>
+                              <span className=''>Market Cap</span>
                               <i
                                 className='fas fa-exclamation-circle ms-2 fs-7'
                                 data-bs-toggle='tooltip'
@@ -421,7 +449,56 @@ const Main: FC = () => {
 
                           <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                              <span className='required'>Upload Image</span>
+                              <span className='required'>Contract Address</span>
+                              <i
+                                className='fas fa-exclamation-circle ms-2 fs-7'
+                                data-bs-toggle='tooltip'
+                                title='Specify contract address'
+                              ></i>
+                            </label>
+
+                            <Field
+                              type='text'
+                              min='1'
+                              className='form-control form-control-lg form-control-solid'
+                              name='contractAddress'
+                              placeholder=''
+
+                            />
+                            <div className='text-danger'>
+                              <ErrorMessage name='contractAddress' />
+                            </div>
+                          </div>
+                          {/* <div className="form-floating mb-9">
+                            <Field as="select" name="color">
+                              <option selected value="BSC">Binance Smart Chain (BSC)</option>
+                              <option value="ETH">Ethereum (ETH)</option>
+                              <option value="MATIC">Polygon (MATIC)</option>
+                              <option value="TRX">Tron (TRX)</option>
+                              <option value="FTM">Fantom (FTM)</option>
+                              <option value="SOL">Solana (SOL)</option>
+                              <option value="KCC">Kucoin Chain (KCC)</option>
+                              <option value="Other">Other</option>
+                            </Field>
+                          </div> */}
+
+                          <div className="form-floating mb-9">
+                            <select className="form-select" id="floatingSelect" onChange={selectChange} aria-label="Floating label select example">
+                              <option selected value="BSC">Binance Smart Chain (BSC)</option>
+                              <option value="ETH">Ethereum (ETH)</option>
+                              <option value="MATIC">Polygon (MATIC)</option>
+                              <option value="TRX">Tron (TRX)</option>
+                              <option value="FTM">Fantom (FTM)</option>
+                              <option value="SOL">Solana (SOL)</option>
+                              <option value="KCC">Kucoin Chain (KCC)</option>
+                              <option value="Other">Other</option>
+                            </select>
+                            <label>Select Network/Chain</label>
+                          </div>
+
+                          <div className='fv-row mb-10'>
+                            <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
+                              <span className='required'>Upload Image </span><span className='text-muted fs-7'>(40*40)</span>
                               <i
                                 className='fas fa-exclamation-circle ms-2 fs-7'
                                 data-bs-toggle='tooltip'
@@ -434,9 +511,9 @@ const Main: FC = () => {
                               type="file"
                               onChange={handleChange}
                             />
-                            {/* <div className='text-danger'>
-                              <ErrorMessage name='mCap' />
-                            </div> */}
+                            <div className='text-danger'>
+                              <ErrorMessage name='image' />
+                            </div>
                           </div>
 
 
@@ -684,7 +761,7 @@ const Main: FC = () => {
                       <div data-kt-stepper-element='content'>
                         <div className='w-100'>
                           <div className='fv-row mb-10'>
-                            <label className='required fs-5 fw-bold mb-2'>Chart link</label>
+                            <label className='fs-5 fw-bold mb-2'>Chart link</label>
 
                             <Field
                               type='url'
@@ -708,6 +785,34 @@ const Main: FC = () => {
                             />
                             <div className='text-danger'>
                               <ErrorMessage name='webLink' />
+                            </div>
+                          </div>
+
+                          <div className='fv-row mb-10'>
+                            <label className='fs-5 fw-bold mb-2'>Telegram Link</label>
+
+                            <Field
+                              type='url'
+                              className='form-control form-control-lg form-control-solid'
+                              name='telegramLink'
+                              placeholder=''
+                            />
+                            <div className='text-danger'>
+                              <ErrorMessage name='telegramLink' />
+                            </div>
+                          </div>
+
+                          <div className='fv-row mb-10'>
+                            <label className='fs-5 fw-bold mb-2'>Discord Link</label>
+
+                            <Field
+                              type='url'
+                              className='form-control form-control-lg form-control-solid'
+                              name='discordLink'
+                              placeholder=''
+                            />
+                            <div className='text-danger'>
+                              <ErrorMessage name='discordLink' />
                             </div>
                           </div>
 
@@ -1004,13 +1109,22 @@ const Main: FC = () => {
                             <p><b>Name: </b>{tokenName}</p>
                             <p><b>Symbol: </b>{symbol}</p>
                             <p><b>Market Cap: </b>{mCap}</p>
+                            <p><b>Contract Address: </b>{contractAddress}</p>
                             <p><b>Website link: </b>{websiteLink}</p>
                             <p><b>Chart Link: </b>{chartlink}</p>
+                            <p><b>Discord Link: </b>{discordLink}</p>
+                            <p><b>Telegram Link: </b>{telegramLink}</p>
                             <p><b>Description: </b>
                               <div style={{ height: '150px', overflowY: 'scroll' }}>
-                              {description}
+                                {description}
                               </div>
-                              </p>
+                            </p>
+                          </div>
+                          <div className="form-check form-check-custom form-check-solid fs-5" >
+                            <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+                            <label className="form-check-label" >
+                              I agree to terms and conditions.
+                            </label>
                           </div>
 
                           {/* <div className='text-center px-4 py-15'>
@@ -1022,6 +1136,8 @@ const Main: FC = () => {
                           </div> */}
                         </div>
                       </div>
+
+
 
                       <div className='d-flex flex-stack pt-10'>
                         <div className='me-2'>
