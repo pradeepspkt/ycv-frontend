@@ -12,6 +12,8 @@ export function MenuInner() {
       <MenuItem title='BLOG' to='/blog-news' />
       {/* <MenuItem title='Details' to='/coin-details' /> */}
       <MenuItem title='LEARNING' to='/educational-content' />
+      <MenuItem title='ADVERTISE' to='/contact' />
+
       {/* <MenuItem title='ROADMAP' to='' /> */}
 
       {/* <MenuInnerWithSub

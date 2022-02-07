@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC } from 'react'
+import React, { FC, useState, useEffect } from 'react'
 import { useIntl } from 'react-intl'
 import { PageTitle } from '../../../_metronic/layout/core'
 import {
@@ -18,9 +18,13 @@ import {
   MixedWidget8,
   StatisticsWidget5,
   StatisticsWidget7,
+  StatisticsWidget8,
+  StatisticsWidget9,
   FooterLeft,
   FooterRight
 } from '../../../_metronic/partials/widgets'
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc, query, where, orderBy } from "firebase/firestore";
+import { app, db } from '../../../firebase';
 
 
 const DashboardPage: FC = () => (
@@ -110,6 +114,29 @@ const DashboardPage: FC = () => (
       <TablesWidget10 className='card-xxl-stretch mb-5 mb-xl-8' />
     </div>
 
+    <div className='row' >
+      <div className='col-xl-6 '>
+      <StatisticsWidget8
+              className='card-xl-stretch mb-xl-8'
+              svgIcon='/media/icons/duotune/general/gen032.svg'
+              color='white'
+              iconColor='primary'
+              title='Advertisement banner'
+              description='Banner goes here'
+            />
+      </div>
+      <div className='col-xl-6 '>
+      <StatisticsWidget9
+              className='card-xl-stretch mb-xl-8'
+              svgIcon='/media/icons/duotune/general/gen032.svg'
+              color='white'
+              iconColor='primary'
+              title='Advertisement banner'
+              description='Banner goes here'
+            />
+      </div>
+    </div>
+
 
     <div className='row' >
       <div className='col-xl-6 '>
@@ -169,10 +196,29 @@ const DashboardWrapper: FC = () => {
   // //@ts-ignore
   // const data = response.json();
   // console.log(data)
+
+  const [count, setCount] = useState(0)
+  const [title, setTitle] = useState('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')
+
+  useEffect(() => {
+    let count = 0
+    const getCount = async () => {
+      const q = query(collection(db, "coins"));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (doc) => {
+        count += 1
+      });
+      setCount(count)
+      setTitle('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')
+    }
+    getCount()
+  }, [])
+
+
   return (
     <>
       {/* <PageTitle breadcrumbs={[]}>{intl.formatMessage({id: 'MENU.DASHBOARD'})}</PageTitle> */}
-      <PageTitle breadcrumbs={[]}>Best Coins Today</PageTitle>
+      <PageTitle breadcrumbs={[]}>{title}</PageTitle>
 
       <DashboardPage />
     </>

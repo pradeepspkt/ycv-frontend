@@ -9,6 +9,8 @@ import {ContentDetail} from '../pages/ContentDetail'
 import {AllCoins} from '../pages/AllCoins'
 import {PromotedCoinsList} from '../pages/PromotedCoinsList'
 import {CoinDetails} from '../pages/CoinDetails'
+import {Contact} from '../pages/Contact'
+
 
 
 export function PrivateRoutes() {
@@ -31,6 +33,7 @@ export function PrivateRoutes() {
         <Route path='/apps/chat' component={ChatPage} />
         <Route path='/menu-test' component={MenuTestPage} />
         <Route path='/blog-news' component={BlogNews} />
+        <Route path='/contact' component={Contact} />
         <Route path='/educational-content' component={EducationalContent} />
         <Route path='/details' component={ContentDetail} />
         <Route path='/all-coins' component={AllCoins} />

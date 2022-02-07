@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react'
 import { KTSVG, toAbsoluteUrl } from '../../../helpers'
-import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc, where } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc, where, endBefore, startAt } from "firebase/firestore";
 import { app, db } from '../../../../firebase';
 import { ToastContainer, toast } from 'react-toastify';
 import { Link } from 'react-router-dom'
@@ -19,6 +19,12 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const [myIP, setIP] = useState('');
   const [voteList, setVoteList] = useState([]);
   const [loading, setLoading] = useState(0);
+  const [lastVisible, setLastVisible] = useState([]);
+  const [firstVisible, setFirstVisible] = useState([]);
+  const [previousStart, setPreviousStart] = useState({});
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pages, setPages] = useState(null)
+  const [rows, setRows] = useState(3)
   // const [selectedNetwork, setNetwork] = useState('BSC')
   const { store } = useContext(ReactReduxContext)
 
@@ -75,18 +81,51 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     }
   }
 
-  const getCoins = async (status: string) => {
+  const calculatePages = async () => {
+    //get approved coins count pages
+    let dataCount: number = 0
+    const qAll = query(collection(db, "coins"), where('status', '==', "approved"));
+    const querySnapshotAll = await getDocs(qAll);
+    querySnapshotAll.forEach(async (doc) => {
+      dataCount = dataCount + 1
+    });
+    const pages = dataCount / rows
+    //@ts-ignore  
+    await setPages(pages)
+    //@ts-ignore
+  }
+
+  const getCoins = async () => {
+    setLoading(0)
     // setPromotedList([])
     let listTemp: any = []
-    const querySnapshot = await getDocs(collection(db, "coins"));
-    querySnapshot.forEach(async (doc: any) => {
-      if (doc.data().status == status) {
-        await listTemp.push({
-          ...doc.data(),
-          id: doc.id,
-        })
-      }
+
+    await calculatePages()
+
+    //get approved coins with limit
+    const q = query(collection(db, "coins"), where('status', '==', "approved"), orderBy("votes", "desc"), limit(rows));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      await listTemp.push({
+        ...doc.data(),
+        id: doc.id,
+      })
     });
+
+
+    let tempLastVisible: any = []
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    tempLastVisible.push(lastVisible)
+    await setLastVisible(tempLastVisible)
+
+    let tempFirstVisible: any = []
+    const firstVisible = await querySnapshot.docs[0]
+    tempFirstVisible.push(firstVisible)
+    await setFirstVisible(tempFirstVisible)
+    //@ts-ignore
+    console.log("first visible before:")
+    console.log(firstVisible)
+    setLoading(1)
     return listTemp
   }
 
@@ -102,10 +141,98 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     await setCoinList(coins)
   }
 
+  const loadPrevPage = async () => {
+    //@ts-ignore
+
+    let listTemp: any = []
+    let tempLastVisible = lastVisible
+
+    const next = query(collection(db, "coins"),
+      orderBy("votes", "desc"),
+      where('status', '==', "approved"),
+      startAt(tempLastVisible[tempLastVisible.length - rows]),
+      endBefore(tempLastVisible[tempLastVisible.length - 1]),
+      limit(rows));
+    const querySnapshot = await getDocs(next);
+    querySnapshot.forEach(async (doc) => {
+      await listTemp.push({
+        ...doc.data(),
+        id: doc.id,
+      })
+    });
+    let voteList = await getVoteList(myIP)
+    await populateVotes(listTemp, voteList)
+
+    let popLastVisibleData = tempLastVisible.pop()
+    //@ts-ignore
+    setLastVisible(popLastVisibleData)
+
+    await setCurrentPage(currentPage - 1)
+
+    // let tempLastVisible= lastVisible
+    // const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // //@ts-ignore
+    // tempLastVisible.push(lastVisibleData)
+    // await setLastVisible(tempLastVisible)
+
+    // let tempFirstVisible= firstVisible
+    // const firstVisibleData = await querySnapshot.docs[0]
+    // //@ts-ignore
+    // tempFirstVisible.push(firstVisibleData)
+    // await setFirstVisible(tempFirstVisible)
+    console.log("first visible before:")
+    console.log(lastVisible)
+    //@ts-ignore
+
+
+  }
+
+  const loadNextPage = async () => {
+    let listTemp: any = []
+    //@ts-ignore
+
+    const next = await query(collection(db, "coins"),
+      orderBy("votes", "desc"),
+      where('status', '==', "approved"),
+      startAfter(lastVisible[lastVisible.length - 1]),
+      limit(rows));
+    const querySnapshot = await getDocs(next);
+    querySnapshot.forEach(async (doc) => {
+      await listTemp.push({
+        ...doc.data(),
+        id: doc.id,
+      })
+    });
+
+    await setCurrentPage(currentPage + 1)
+
+    let tempLastVisible = lastVisible
+    const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
+    //@ts-ignore
+    tempLastVisible.push(lastVisibleData)
+    await setLastVisible(tempLastVisible)
+
+    console.log(lastVisible)
+
+    // let tempFirstVisible = firstVisible
+    // const firstVisibleData = await querySnapshot.docs[0]
+    // //@ts-ignore
+    // tempFirstVisible.push(firstVisibleData)
+    // await setFirstVisible(tempFirstVisible)
+    // console.log("first visible before:")
+    // console.log(firstVisible)
+    //@ts-ignore
+
+    //@ts-ignore
+    // console.log(firstVisible.data()?.name)
+    let voteList = await getVoteList(myIP)
+    await populateVotes(listTemp, voteList)
+  }
+
   const main = async () => {
     let ipAddress = await getIP()
     let voteList = await getVoteList(ipAddress)
-    let coins = await getCoins('approved')
+    let coins = await getCoins()
     await populateVotes(coins, voteList)
     setLoading(1)
   }
@@ -471,11 +598,11 @@ $308,236,260
             {/* begin::Table body */}
             <tbody>
               {renderList.length > 0 ?
-              renderList 
-            :
-            <div className='m-5 mt-5 mb-5'>
-            Coins not found.
-            </div>}
+                renderList
+                :
+                <div className='m-5 mt-5 mb-5'>
+                  Coins not found.
+                </div>}
               {/* <tr>
                 <td>
                   <div className='form-check form-check-sm form-check-custom form-check-solid'>
@@ -764,12 +891,16 @@ $308,236,260
 
           <div className='card-header'>
             <span className='mt-5 align-items-start flex-column'>
-              Page 1 of {round(coinList.length / 10, 1)}
+              Page {currentPage} of {pages} - {
+                //@ts-ignore
+                // loading ? firstVisible ? firstVisible?.data() : null : null
+              }
+              {/* Page {currentPage} of {round(coinList.length / 10, 1)} */}
             </span>
             <ul className="pagination pagination-outline mt-3">
-              <li className="page-item previous disabled m-1"><a href="#" className="page-link"><i className="previous"></i></a></li>
+              <li className={currentPage > 1 ? "page-item previous m-1" : "page-item previous disabled m-1"}><a onClick={loadPrevPage} className="page-link"><i className="previous"></i></a></li>
+              <li className={currentPage == pages ? "page-item next m-1 disabled" : "page-item next m-1"}><a onClick={loadNextPage} className="page-link"><i className="next"></i></a></li>
 
-              <li className="page-item next m-1"><a href="#" className="page-link"><i className="next"></i></a></li>
             </ul>
           </div>
           {/* end::Table */}

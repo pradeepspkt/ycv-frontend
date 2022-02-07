@@ -2,7 +2,7 @@
 import React from 'react'
 import { KTSVG, toAbsoluteUrl } from '../../../helpers'
 import { useState, useEffect } from 'react'
-import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc, query, where, orderBy, limit } from "firebase/firestore";
 import { app, db } from '../../../../firebase';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -75,15 +75,26 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const getCoins = async (status: string) => {
     // setPromotedList([])
     let listTemp: any = []
-    const querySnapshot = await getDocs(collection(db, "coins"));
-    querySnapshot.forEach(async (doc: any) => {
-      if (doc.data().status == status) {
+
+
+    const q = query(collection(db, "coins"), where('status', '==', "sponsored"), orderBy("votes", "desc"), limit(6));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      console.log('coin:'+doc.data())
         await listTemp.push({
           ...doc.data(),
           id: doc.id,
         })
-      }
     });
+    // const querySnapshot1 = await getDocs(collection(db, "coins"));
+    // querySnapshot.forEach(async (doc: any) => {
+    //   if (doc.data().status == status) {
+    //     await listTemp.push({
+    //       ...doc.data(),
+    //       id: doc.id,
+    //     })
+    //   }
+    // });
     return listTemp
   }
 
@@ -183,8 +194,8 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
           </td>
           <td className="d-none d-lg-table-cell">
             {
-            //@ts-ignore
-            item.network? item.network.toUpperCase(): 'NA'}
+              //@ts-ignore
+              item.network ? item.network.toUpperCase() : 'NA'}
           </td>
           {/* <td>
         <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
@@ -219,30 +230,30 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
                   <button type="button" disabled className="btn btn-default btn-sm"><b>{
                     //@ts-ignore
                     item.votes}</b></button>
-                   <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { 
-                     //@ts-ignore
-                     submitVote(item.symbol, index, item.id) 
-                     }}>
-                  VOTE !
-                </button>
+                  <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => {
+                    //@ts-ignore
+                    submitVote(item.symbol, index, item.id)
+                  }}>
+                    VOTE !
+                  </button>
                 </div>
-               
+
               </>
             }
             {
               //@ts-ignore
               item.vote == 0 &&
               <>
-               <div className="btn-group border border-success rounded"  role="group" aria-label="Basic example">
+                <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
                   <button type="button" disabled className="btn btn-default btn-sm">{
                     //@ts-ignore
                     item.votes}</button>
                   <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                VOTED
-              </button>
+                    VOTED
+                  </button>
                 </div>
               </>
-              
+
 
             }
             {
@@ -289,7 +300,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
           <span className='text-muted mt-1 fw-bold fs-7'>Tokens we recommend</span>
         </h3>
         <div className='card-toolbar'>
-        
+
           {/* begin::Menu */}
           <button
             type='button'

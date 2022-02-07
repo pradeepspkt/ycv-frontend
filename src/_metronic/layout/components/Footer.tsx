@@ -27,7 +27,7 @@ const Footer: FC = () => {
             </a>
           </li>
           <li className='menu-item'>
-            <a href='#' className='menu-link pe-0 pe-2'>
+            <a href='/contact/' className='menu-link pe-0 pe-2'>
               Contact
             </a>
           </li>
