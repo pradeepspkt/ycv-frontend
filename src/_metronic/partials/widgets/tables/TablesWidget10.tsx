@@ -17,6 +17,7 @@ type Props = {
 const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const [coinList, setCoinList] = useState([]);
   const [myIP, setIP] = useState('');
+  const [network, setNetworkData] = useState('');
   const [voteList, setVoteList] = useState([]);
   const [loading, setLoading] = useState(0);
   const [lastVisible, setLastVisible] = useState([]);
@@ -24,7 +25,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const [previousStart, setPreviousStart] = useState({});
   const [currentPage, setCurrentPage] = useState(1)
   const [pages, setPages] = useState(null)
-  const [rows, setRows] = useState(3)
+  const [rows, setRows] = useState(10)
   // const [selectedNetwork, setNetwork] = useState('BSC')
   const { store } = useContext(ReactReduxContext)
 
@@ -81,18 +82,29 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     }
   }
 
-  const calculatePages = async () => {
+  const calculatePages = async (networkData: string) => {
     //get approved coins count pages
-    let dataCount: number = 0
-    const qAll = query(collection(db, "coins"), where('status', '==', "approved"));
+    let dataCount: number = 1
+    // let qAll;
+
+
+    const qAll = await networkData.length > 0 ?
+      query(collection(db, "coins"), where('status', '==', "approved"), where("network", "==", networkData))
+      :
+      query(collection(db, "coins"), where('status', '==', "approved"))
+
+
     const querySnapshotAll = await getDocs(qAll);
+    //@ts-ignore
     querySnapshotAll.forEach(async (doc) => {
       dataCount = dataCount + 1
     });
-    const pages = dataCount / rows
+    console.log('NETWORK: ' + networkData)
+    console.log('data: ' + dataCount)
+    const pages = await round(dataCount / rows, 1)
     //@ts-ignore  
     await setPages(pages)
-    //@ts-ignore
+    return pages
   }
 
   const getCoins = async () => {
@@ -100,7 +112,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     // setPromotedList([])
     let listTemp: any = []
 
-    await calculatePages()
+    await calculatePages("")
 
     //get approved coins with limit
     const q = query(collection(db, "coins"), where('status', '==', "approved"), orderBy("votes", "desc"), limit(rows));
@@ -123,8 +135,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     tempFirstVisible.push(firstVisible)
     await setFirstVisible(tempFirstVisible)
     //@ts-ignore
-    console.log("first visible before:")
-    console.log(firstVisible)
     setLoading(1)
     return listTemp
   }
@@ -146,13 +156,23 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
     let listTemp: any = []
     let tempLastVisible = lastVisible
+    let tempFirstVisible = firstVisible
 
-    const next = query(collection(db, "coins"),
-      orderBy("votes", "desc"),
-      where('status', '==', "approved"),
-      startAt(tempLastVisible[tempLastVisible.length - rows]),
-      endBefore(tempLastVisible[tempLastVisible.length - 1]),
-      limit(rows));
+    const next = network.length > 0 ?
+      query(collection(db, "coins"),
+        orderBy("votes", "desc"),
+        where('status', '==', "approved"),
+        where('network', '==', network),
+        startAt(tempFirstVisible[tempFirstVisible.length - 2]),
+        // endBefore(tempLastVisible[tempLastVisible.length - 1]),
+        limit(rows))
+      :
+      query(collection(db, "coins"),
+        orderBy("votes", "desc"),
+        where('status', '==', "approved"),
+        startAt(tempFirstVisible[tempFirstVisible.length - 2]),
+        // endBefore(tempLastVisible[tempLastVisible.length - 1]),
+        limit(rows));
     const querySnapshot = await getDocs(next);
     querySnapshot.forEach(async (doc) => {
       await listTemp.push({
@@ -163,26 +183,17 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     let voteList = await getVoteList(myIP)
     await populateVotes(listTemp, voteList)
 
-    let popLastVisibleData = tempLastVisible.pop()
+    let popFirstVisible = tempFirstVisible.pop()
     //@ts-ignore
-    setLastVisible(popLastVisibleData)
+    setLastVisible(popFirstVisible)
 
     await setCurrentPage(currentPage - 1)
 
-    // let tempLastVisible= lastVisible
-    // const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
-    // //@ts-ignore
-    // tempLastVisible.push(lastVisibleData)
-    // await setLastVisible(tempLastVisible)
-
-    // let tempFirstVisible= firstVisible
-    // const firstVisibleData = await querySnapshot.docs[0]
-    // //@ts-ignore
-    // tempFirstVisible.push(firstVisibleData)
-    // await setFirstVisible(tempFirstVisible)
-    console.log("first visible before:")
-    console.log(lastVisible)
+    const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
     //@ts-ignore
+    tempLastVisible.push(lastVisibleData)
+    await setLastVisible(tempLastVisible)
+
 
 
   }
@@ -191,11 +202,19 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     let listTemp: any = []
     //@ts-ignore
 
-    const next = await query(collection(db, "coins"),
-      orderBy("votes", "desc"),
-      where('status', '==', "approved"),
-      startAfter(lastVisible[lastVisible.length - 1]),
-      limit(rows));
+    const next = network.length > 0 ?
+      await query(collection(db, "coins"),
+        orderBy("votes", "desc"),
+        where('status', '==', "approved"),
+        where('network', '==', network),
+        startAfter(lastVisible[lastVisible.length - 1]),
+        limit(rows))
+      :
+      await query(collection(db, "coins"),
+        orderBy("votes", "desc"),
+        where('status', '==', "approved"),
+        startAfter(lastVisible[lastVisible.length - 1]),
+        limit(rows));
     const querySnapshot = await getDocs(next);
     querySnapshot.forEach(async (doc) => {
       await listTemp.push({
@@ -212,19 +231,12 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     tempLastVisible.push(lastVisibleData)
     await setLastVisible(tempLastVisible)
 
-    console.log(lastVisible)
-
-    // let tempFirstVisible = firstVisible
-    // const firstVisibleData = await querySnapshot.docs[0]
-    // //@ts-ignore
-    // tempFirstVisible.push(firstVisibleData)
-    // await setFirstVisible(tempFirstVisible)
-    // console.log("first visible before:")
-    // console.log(firstVisible)
+    let tempFirstVisible = firstVisible
+    const firstVisibleData = await querySnapshot.docs[0]
     //@ts-ignore
+    tempFirstVisible.push(firstVisibleData)
+    await setFirstVisible(tempFirstVisible)
 
-    //@ts-ignore
-    // console.log(firstVisible.data()?.name)
     let voteList = await getVoteList(myIP)
     await populateVotes(listTemp, voteList)
   }
@@ -234,6 +246,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     let voteList = await getVoteList(ipAddress)
     let coins = await getCoins()
     await populateVotes(coins, voteList)
+    await calculatePages("")
     setLoading(1)
   }
 
@@ -275,6 +288,11 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     });
   }
 
+  const setNetworkState = async (network: string) => {
+    await setNetworkData(network)
+    return network
+  }
+
   function round(val: any, multiplesOf: any) {
     var s = 1 / multiplesOf;
     var res = Math.ceil(val * s) / s;
@@ -284,8 +302,20 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const setNetwork = async (network: string) => {
+    await setFirstVisible([])
+    await setLastVisible([])
+    //@ts-ignore
+    await setCurrentPage(1)
+
+    if (network == 'All') {
+      await setNetworkData('')
+      await main()
+      return
+    }
+    let networkValue = await setNetworkState(network)
+    let pages = await calculatePages(networkValue)
     let listTemp: any = []
-    const q = query(collection(db, "coins"), where("network", "==", network));
+    const q = query(collection(db, "coins"), where("network", "==", network), limit(rows));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach(async (doc) => {
       // doc.data() is never undefined for query doc snapshots
@@ -294,6 +324,17 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
         id: doc.id,
       })
     });
+
+    let tempLastVisible: any = []
+    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    tempLastVisible.push(lastVisible)
+    await setLastVisible(tempLastVisible)
+
+    let tempFirstVisible: any = []
+    const firstVisible = await querySnapshot.docs[0]
+    tempFirstVisible.push(firstVisible)
+    await setFirstVisible(tempFirstVisible)
+
     let voteList = await getVoteList(myIP)
     let coins = listTemp
     await populateVotes(coins, voteList)
@@ -469,7 +510,7 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary active fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { main() }}
+                onClick={() => { setNetwork('All') }}
               >
                 All
               </a>
@@ -891,11 +932,7 @@ $308,236,260
 
           <div className='card-header'>
             <span className='mt-5 align-items-start flex-column'>
-              Page {currentPage} of {pages} - {
-                //@ts-ignore
-                // loading ? firstVisible ? firstVisible?.data() : null : null
-              }
-              {/* Page {currentPage} of {round(coinList.length / 10, 1)} */}
+              Page {currentPage} of {pages}
             </span>
             <ul className="pagination pagination-outline mt-3">
               <li className={currentPage > 1 ? "page-item previous m-1" : "page-item previous disabled m-1"}><a onClick={loadPrevPage} className="page-link"><i className="previous"></i></a></li>
