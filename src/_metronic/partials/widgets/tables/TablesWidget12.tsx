@@ -24,97 +24,23 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     main()
   }, [])
 
-  const getIP = async () => {
-    const response = await fetch('https://geolocation-db.com/json/');
-    const data = await response.json();
-    await setIP(data.IPv4)
-    return data.IPv4
-  }
-
-  const getVoteList = async (ip: any) => {
-    const docRef = doc(db, "voterIP", ip);
-    const docSnap = await getDoc(docRef);
-    let ipData: any = []
-    if (docSnap.exists()) {
-      await setVoteList(docSnap.data().coin)
-      ipData = docSnap.data().coin
-    }
-    return ipData
-  }
-
-  const addToVoteList = async (ip: any, symbol: any) => {
-    const docRef = doc(db, "voterIP", ip);
-    const docSnap = await getDoc(docRef);
-    let voteData: any = []
-    if (docSnap.exists()) {
-      voteData = docSnap.data().coin
-      voteData.push(symbol.toUpperCase())
-      await updateDoc(docRef, {
-        coin: voteData
-      });
-    } else {
-      voteData.push(symbol.toUpperCase())
-      await setDoc(doc(db, "voterIP", myIP), {
-        coin: voteData
-      });
-    }
-  }
-
-  const addVote = async (id: any) => {
-    const docRef = doc(db, "coins", id);
-    const docSnap = await getDoc(docRef);
-    let count: any = null
-    if (docSnap.exists()) {
-      count = docSnap.data().votes + 1
-      await updateDoc(docRef, {
-        votes: count
-      });
-    }
-  }
-
   const getCoins = async (status: string) => {
     // setPromotedList([])
     let listTemp: any = []
-
-
-    const q = query(collection(db, "coins"), where('status', '==', "sponsored"), orderBy("votes", "desc"), limit(6));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      console.log('coin:'+doc.data())
-        await listTemp.push({
-          ...doc.data(),
-          id: doc.id,
-        })
-    });
-    // const querySnapshot1 = await getDocs(collection(db, "coins"));
-    // querySnapshot.forEach(async (doc: any) => {
-    //   if (doc.data().status == status) {
-    //     await listTemp.push({
-    //       ...doc.data(),
-    //       id: doc.id,
-    //     })
-    //   }
-    // });
+     fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoins?status='+status)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+              console.log(data.coins)
+              setPromotedList(data.coins)
+            });
     return listTemp
   }
 
-  const populateVotes = async (coins: any, voteList: any) => {
-    for (let i = 0; i < coins.length; i++) {
-      let coinSymbol = (coins[i].symbol).toUpperCase()
-      let status = 1
-      if (await voteList.includes(coinSymbol)) {
-        status = 0
-      }
-      coins[i].vote = status
-    }
-    await setPromotedList(coins)
-  }
 
   const main = async () => {
-    let ipAddress = await getIP()
-    let voteList = await getVoteList(ipAddress)
     let coins = await getCoins('sponsored')
-    await populateVotes(coins, voteList)
     setLoading(1)
   }
 
@@ -135,25 +61,39 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
       draggable: true,
       progress: undefined,
     });
-    // let coins = await promotedList
-    // //@ts-ignore
-    // coins[index].vote = 2
-    // await setPromotedList(coins)
-    // console.log(promotedList)
-    await addToVoteList(myIP, coin)
-    await addVote(id)
-    await main()
+    
+    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+              if(data.success){
+                toast.success('Vote successfull! Please submit your vote again tomorrow.', {
+                  position: "bottom-right",
+                  icon: "🚀",
+                  autoClose: 5000,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              }else{
+                toast.success('Try voting again tomorrow.', {
+                  position: "bottom-right",
+                  icon: "🚀",
+                  autoClose: 5000,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              }
+              
+            });
 
-    toast.success('Vote successfull! Please submit your vote again tomorrow.', {
-      position: "bottom-right",
-      icon: "🚀",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    await main()
   }
 
   const renderList = promotedList.map((item, index) => {

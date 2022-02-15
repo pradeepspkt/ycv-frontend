@@ -32,7 +32,8 @@ interface ICreateAccount {
   saveCard: string,
   discordLink: string,
   telegramLink: string,
-  contractAddress: string
+  contractAddress: string,
+  email: string
 }
 
 const inits: ICreateAccount = {
@@ -54,7 +55,8 @@ const inits: ICreateAccount = {
   saveCard: '1',
   discordLink: '',
   telegramLink: '',
-  contractAddress: ''
+  contractAddress: '',
+  email: ''
 }
 
 const createAppSchema = [
@@ -63,6 +65,7 @@ const createAppSchema = [
     symbol: Yup.string().required().label('Symbol'),
     mCap: Yup.string().label('Market cap'),
     contractAddress: Yup.string().required().label('Contract Address'),
+    email: Yup.string().required().label('Email'),
   }),
   Yup.object({
     description: Yup.string().required().label('Description'),
@@ -83,6 +86,7 @@ const Main: FC = () => {
   const [snackMsg, setSnackMsg] = useState('');
 
   const [tokenName, setTokenName] = useState('');
+  const [email, setEmail] = useState('');
   const [discordLink, setDiscordLink] = useState('');
   const [contractAddress, setContractAddress] = useState('');
   const [telegramLink, setTelegramLink] = useState('');
@@ -135,6 +139,26 @@ const Main: FC = () => {
   }
 
 
+  
+  // const postCoinData = async(data:any) => {
+
+  //   fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
+  //     method: 'POST', // or 'PUT'
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(data),
+  //   })
+  //   .then(response => response.json())
+  //   .then(data => {
+  //     console.log('Success:', data);
+  //   })
+  //   .catch((error) => {
+  //     console.error('Error:', error);
+  //   });
+  // }
+
+
 
 
   const loadStepper = () => {
@@ -161,6 +185,7 @@ const Main: FC = () => {
     setWebsiteLink(values.webLink)
     setDescription(values.description)
     setSymbol(values.symbol)
+    setEmail(values.email)
     if (!stepper.current) {
       return
     }
@@ -219,7 +244,26 @@ const Main: FC = () => {
           // Handle successful uploads on complete
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            const docRef = await addDoc(collection(db, "coins"), {
+            // const docRef = await addDoc(collection(db, "coins"), {
+            //   name: values.appName,
+            //   mCap: values.mCap,
+            //   webLink: values.webLink,
+            //   chartlink: values.chartLink,
+            //   description: values.description,
+            //   symbol: values.symbol,
+            //   discordLink: values.discordLink,
+            //   telegramLink: values.telegramLink,
+            //   contractAddress: values.contractAddress,
+            //   network: network,
+            //   status: 'pending',
+            //   votes: 0,
+            //   avatar: downloadURL,
+            //   email: values.email
+            // });
+
+
+            
+            const data = { 
               name: values.appName,
               mCap: values.mCap,
               webLink: values.webLink,
@@ -232,20 +276,40 @@ const Main: FC = () => {
               network: network,
               status: 'pending',
               votes: 0,
-              avatar: downloadURL
+              avatar: downloadURL,
+              email: values.email
+             };
+
+            fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
+              method: 'POST', // or 'PUT'
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Success:', data);
+              toast.success('🦄 Coin submitted successfully! Ready for review.', {
+                position: "bottom-right",
+                autoClose: 10000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+            })
+            .catch((error) => {
+              console.error('Error:', error);
             });
 
 
+            // fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest='+values.email+'&coin='+values.appName+'&status=pending')
+            // .then(response => {})
+            // .then(data => {});
 
-            toast.success('🦄 Coin submitted successfully! Ready for review.', {
-              position: "bottom-right",
-              autoClose: 10000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-              progress: undefined,
-            });
+            
           });
         }
       );
@@ -515,6 +579,28 @@ const Main: FC = () => {
                               <ErrorMessage name='image' />
                             </div>
                           </div>
+
+                          <div className='fv-row mb-10'>
+                          <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
+                            <span className=''>Contact Email</span>
+                            <i
+                              className='fas fa-exclamation-circle ms-2 fs-7'
+                              data-bs-toggle='tooltip'
+                              title='Specify contact email'
+                            ></i>
+                          </label>
+
+                          <Field
+                            type='text'
+                            className='form-control form-control-lg form-control-solid'
+                            name='email'
+                            placeholder=''
+
+                          />
+                          <div className='text-danger'>
+                            <ErrorMessage name='email' />
+                          </div>
+                        </div>
 
 
                           {/* <div className='fv-row'>
