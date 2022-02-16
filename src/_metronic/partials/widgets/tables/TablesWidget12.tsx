@@ -27,12 +27,11 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const getCoins = async (status: string) => {
     // setPromotedList([])
     let listTemp: any = []
-     fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoins?status='+status)
+     fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsPromoted?status='+status)
             .then(response => {
                 return response.json()
             })
             .then(data => {
-              console.log(data.coins)
               setPromotedList(data.coins)
             });
     return listTemp

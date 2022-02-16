@@ -34,53 +34,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
   }, [])
 
-  const getIP = async () => {
-    const response = await fetch('https://geolocation-db.com/json/');
-    const data = await response.json();
-    await setIP(data.IPv4)
-    return data.IPv4
-  }
-
-  const getVoteList = async (ip: any) => {
-    const docRef = doc(db, "voterIP", ip);
-    const docSnap = await getDoc(docRef);
-    let ipData: any = []
-    if (docSnap.exists()) {
-      await setVoteList(docSnap.data().coin)
-      ipData = docSnap.data().coin
-    }
-    return ipData
-  }
-
-  const addToVoteList = async (ip: any, symbol: any) => {
-    const docRef = doc(db, "voterIP", ip);
-    const docSnap = await getDoc(docRef);
-    let voteData: any = []
-    if (docSnap.exists()) {
-      voteData = docSnap.data().coin
-      voteData.push(symbol.toUpperCase())
-      await updateDoc(docRef, {
-        coin: voteData
-      });
-    } else {
-      voteData.push(symbol.toUpperCase())
-      await setDoc(doc(db, "voterIP", myIP), {
-        coin: voteData
-      });
-    }
-  }
-
-  const addVote = async (id: any) => {
-    const docRef = doc(db, "coins", id);
-    const docSnap = await getDoc(docRef);
-    let count: any = null
-    if (docSnap.exists()) {
-      count = docSnap.data().votes + 1
-      await updateDoc(docRef, {
-        votes: count
-      });
-    }
-  }
 
   const calculatePages = async (networkData: string) => {
     //get approved coins count pages
@@ -112,6 +65,15 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     // setPromotedList([])
     let listTemp: any = []
 
+    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll')
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+              setCoinList(data.coins)
+            });
+
+
     await calculatePages("")
 
     //get approved coins with limit
@@ -137,18 +99,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     //@ts-ignore
     setLoading(1)
     return listTemp
-  }
-
-  const populateVotes = async (coins: any, voteList: any) => {
-    for (let i = 0; i < coins.length; i++) {
-      let coinSymbol = (coins[i].symbol).toUpperCase()
-      let status = 1
-      if (await voteList.includes(coinSymbol)) {
-        status = 0
-      }
-      coins[i].vote = status
-    }
-    await setCoinList(coins)
   }
 
   const loadPrevPage = async () => {
@@ -180,8 +130,8 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
         id: doc.id,
       })
     });
-    let voteList = await getVoteList(myIP)
-    await populateVotes(listTemp, voteList)
+    // let voteList = await getVoteList(myIP)
+    // await populateVotes(listTemp, voteList)
 
     let popFirstVisible = tempFirstVisible.pop()
     //@ts-ignore
@@ -237,15 +187,12 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     tempFirstVisible.push(firstVisibleData)
     await setFirstVisible(tempFirstVisible)
 
-    let voteList = await getVoteList(myIP)
-    await populateVotes(listTemp, voteList)
+    // let voteList = await getVoteList(myIP)
+    // await populateVotes(listTemp, voteList)
   }
 
   const main = async () => {
-    let ipAddress = await getIP()
-    let voteList = await getVoteList(ipAddress)
     let coins = await getCoins()
-    await populateVotes(coins, voteList)
     await calculatePages("")
     setLoading(1)
   }
@@ -268,24 +215,40 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
       draggable: true,
       progress: undefined,
     });
-    let coins = await coinList
-    //@ts-ignore
-    coins[index].vote = 2
-    await setCoinList(coins)
-    await addToVoteList(myIP, coin)
-    await addVote(id)
-    await main()
 
-    toast.success('Vote successfull! Please submit your vote again tomorrow.', {
-      position: "bottom-right",
-      icon: "🚀",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+
+    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+              if(data.success){
+                toast.success('Vote successfull! Please submit your vote again tomorrow.', {
+                  position: "bottom-right",
+                  icon: "🚀",
+                  autoClose: 5000,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              }else{
+                toast.success('Try voting again tomorrow.', {
+                  position: "bottom-right",
+                  icon: "🚀",
+                  autoClose: 5000,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                });
+              }
+              
+            });
+
+    await main()
   }
 
   const setNetworkState = async (network: string) => {
@@ -302,43 +265,55 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const setNetwork = async (network: string) => {
-    await setFirstVisible([])
-    await setLastVisible([])
-    //@ts-ignore
-    await setCurrentPage(1)
-
-    if (network == 'All') {
-      await setNetworkData('')
-      await main()
+    if(network == "All") {
+      getCoins()
       return
     }
-    let networkValue = await setNetworkState(network)
-    let pages = await calculatePages(networkValue)
-    let listTemp: any = []
-    const q = query(collection(db, "coins"), where("network", "==", network), limit(rows));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      // doc.data() is never undefined for query doc snapshots
-      await listTemp.push({
-        ...doc.data(),
-        id: doc.id,
-      })
-    });
+    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network='+network)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+              setCoinList(data.coins)
+            });
 
-    let tempLastVisible: any = []
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    tempLastVisible.push(lastVisible)
-    await setLastVisible(tempLastVisible)
+    // await setFirstVisible([])
+    // await setLastVisible([])
+    // //@ts-ignore
+    // await setCurrentPage(1)
 
-    let tempFirstVisible: any = []
-    const firstVisible = await querySnapshot.docs[0]
-    tempFirstVisible.push(firstVisible)
-    await setFirstVisible(tempFirstVisible)
+    // if (network == 'All') {
+    //   await setNetworkData('')
+    //   await main()
+    //   return
+    // }
+    // let networkValue = await setNetworkState(network)
+    // let pages = await calculatePages(networkValue)
+    // let listTemp: any = []
+    // const q = query(collection(db, "coins"), where("network", "==", network), limit(rows));
+    // const querySnapshot = await getDocs(q);
+    // querySnapshot.forEach(async (doc) => {
+    //   // doc.data() is never undefined for query doc snapshots
+    //   await listTemp.push({
+    //     ...doc.data(),
+    //     id: doc.id,
+    //   })
+    // });
 
-    let voteList = await getVoteList(myIP)
-    let coins = listTemp
-    await populateVotes(coins, voteList)
-    await setCoinList(listTemp)
+    // let tempLastVisible: any = []
+    // const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // tempLastVisible.push(lastVisible)
+    // await setLastVisible(tempLastVisible)
+
+    // let tempFirstVisible: any = []
+    // const firstVisible = await querySnapshot.docs[0]
+    // tempFirstVisible.push(firstVisible)
+    // await setFirstVisible(tempFirstVisible)
+
+    // // let voteList = await getVoteList(myIP)
+    // let coins = listTemp
+    // // await populateVotes(coins, voteList)
+    // await setCoinList(listTemp)
   }
 
   const renderList = coinList.map((item, index) => {
