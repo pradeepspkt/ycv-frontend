@@ -64,128 +64,214 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setLoading(0)
     // setPromotedList([])
     let listTemp: any = []
+    let lastVisbileData: any = [], firstVisibleData: any = []
+    let respData: any = []
 
-    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll')
-            .then(response => {
-                return response.json()
-            })
-            .then(data => {
-              setCoinList(data.coins)
-            });
+    const coinPromise = new Promise(async (resolve, reject) => {
+      await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll')
+        .then(response => {
+          return response.json()
+        })
+        .then(async (data) => {
+          respData = data
+          resolve(respData)
+        });
+    })
+
+    coinPromise.then(async (data: any) => {
+      await setCoinList(data.coins)
+      await setPages(data.pages)
+      await lastVisbileData.push(respData.lastVisible)
+      await firstVisibleData.push(respData.firstVisible)
+      await setLastVisible(lastVisbileData)
+      await setFirstVisible(firstVisibleData)
+    })
 
 
-    await calculatePages("")
-
-    //get approved coins with limit
-    const q = query(collection(db, "coins"), where('status', '==', "approved"), orderBy("votes", "desc"), limit(rows));
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      await listTemp.push({
-        ...doc.data(),
-        id: doc.id,
-      })
-    });
+   
 
 
-    let tempLastVisible: any = []
-    const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    tempLastVisible.push(lastVisible)
-    await setLastVisible(tempLastVisible)
+    // //get approved coins with limit
+    // const q = query(collection(db, "coins"), where('status', '==', "approved"), orderBy("votes", "desc"), limit(rows));
+    // const querySnapshot = await getDocs(q);
+    // querySnapshot.forEach(async (doc) => {
+    //   await listTemp.push({
+    //     ...doc.data(),
+    //     id: doc.id,
+    //   })
+    // });
 
-    let tempFirstVisible: any = []
-    const firstVisible = await querySnapshot.docs[0]
-    tempFirstVisible.push(firstVisible)
-    await setFirstVisible(tempFirstVisible)
-    //@ts-ignore
-    setLoading(1)
-    return listTemp
+
+    // let tempLastVisible: any = []
+    // const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // tempLastVisible.push(lastVisible)
+    // await setLastVisible(tempLastVisible)
+
+    // let tempFirstVisible: any = []
+    // const firstVisible = await querySnapshot.docs[0]
+    // tempFirstVisible.push(firstVisible)
+    // await setFirstVisible(tempFirstVisible)
+    // //@ts-ignore
+    // setLoading(1)
+    // return listTemp
   }
 
   const loadPrevPage = async () => {
     //@ts-ignore
 
-    let listTemp: any = []
-    let tempLastVisible = lastVisible
-    let tempFirstVisible = firstVisible
-
-    const next = network.length > 0 ?
-      query(collection(db, "coins"),
-        orderBy("votes", "desc"),
-        where('status', '==', "approved"),
-        where('network', '==', network),
-        startAt(tempFirstVisible[tempFirstVisible.length - 2]),
-        // endBefore(tempLastVisible[tempLastVisible.length - 1]),
-        limit(rows))
+    let url = ""
+    console.log(lastVisible)
+    const nextQuery = network.length > 0 ?
+    //@ts-ignore
+      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network + '&startAt=' + firstVisible[firstVisible.length - 2]
       :
-      query(collection(db, "coins"),
-        orderBy("votes", "desc"),
-        where('status', '==', "approved"),
-        startAt(tempFirstVisible[tempFirstVisible.length - 2]),
-        // endBefore(tempLastVisible[tempLastVisible.length - 1]),
-        limit(rows));
-    const querySnapshot = await getDocs(next);
-    querySnapshot.forEach(async (doc) => {
-      await listTemp.push({
-        ...doc.data(),
-        id: doc.id,
+      //@ts-ignore
+      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAt=' + firstVisible[firstVisible.length - 2]
+
+
+    fetch(url)
+      .then(response => {
+        return response.json()
       })
-    });
-    // let voteList = await getVoteList(myIP)
-    // await populateVotes(listTemp, voteList)
+      .then(async(data) => {
+        setCoinList(data.coins)
+        setPages(data.pages)
+        let lastVisbileData: any = lastVisible, firstVisibleData: any = firstVisible
+        await firstVisibleData.pop()
+        await lastVisbileData.pop()
 
-    let popFirstVisible = tempFirstVisible.pop()
-    //@ts-ignore
-    setLastVisible(popFirstVisible)
+        console.log(firstVisible)
+        console.log(lastVisible)
 
-    await setCurrentPage(currentPage - 1)
+        setLastVisible(lastVisbileData)
+        setFirstVisible(firstVisibleData)
+        setCurrentPage(currentPage-1)
+      });
 
-    const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
-    //@ts-ignore
-    tempLastVisible.push(lastVisibleData)
-    await setLastVisible(tempLastVisible)
+    // let listTemp: any = []
+    // let tempLastVisible = lastVisible
+    // let tempFirstVisible = firstVisible
+
+    // const next = network.length > 0 ?
+    //   query(collection(db, "coins"),
+    //     orderBy("votes", "desc"),
+    //     where('status', '==', "approved"),
+    //     where('network', '==', network),
+    //     startAt(tempFirstVisible[tempFirstVisible.length - 2]),
+    //     // endBefore(tempLastVisible[tempLastVisible.length - 1]),
+    //     limit(rows))
+    //   :
+    //   query(collection(db, "coins"),
+    //     orderBy("votes", "desc"),
+    //     where('status', '==', "approved"),
+    //     startAt(tempFirstVisible[tempFirstVisible.length - 2]),
+    //     // endBefore(tempLastVisible[tempLastVisible.length - 1]),
+    //     limit(rows));
+    // const querySnapshot = await getDocs(next);
+    // querySnapshot.forEach(async (doc) => {
+    //   await listTemp.push({
+    //     ...doc.data(),
+    //     id: doc.id,
+    //   })
+    // });
+    // // let voteList = await getVoteList(myIP)
+    // // await populateVotes(listTemp, voteList)
+
+    // let popFirstVisible = tempFirstVisible.pop()
+    // //@ts-ignore
+    // setLastVisible(popFirstVisible)
+
+    // await setCurrentPage(currentPage - 1)
+
+    // const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // //@ts-ignore
+    // tempLastVisible.push(lastVisibleData)
+    // await setLastVisible(tempLastVisible)
 
 
 
   }
 
   const loadNextPage = async () => {
-    let listTemp: any = []
-    //@ts-ignore
+    let url = ""
+    let respData:any = []
+    let templastVisbileData: any = lastVisible
+    let tempfirstVisibleData: any = firstVisible
 
-    const next = network.length > 0 ?
-      await query(collection(db, "coins"),
-        orderBy("votes", "desc"),
-        where('status', '==', "approved"),
-        where('network', '==', network),
-        startAfter(lastVisible[lastVisible.length - 1]),
-        limit(rows))
+    const nextQuery = network.length > 0 ?
+    //@ts-ignore
+      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network + '&startAfter=' + lastVisible[lastVisible.length - 1]
       :
-      await query(collection(db, "coins"),
-        orderBy("votes", "desc"),
-        where('status', '==', "approved"),
-        startAfter(lastVisible[lastVisible.length - 1]),
-        limit(rows));
-    const querySnapshot = await getDocs(next);
-    querySnapshot.forEach(async (doc) => {
-      await listTemp.push({
-        ...doc.data(),
-        id: doc.id,
-      })
-    });
+      //@ts-ignore
+      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAfter=' + lastVisible[lastVisible.length - 1]
 
-    await setCurrentPage(currentPage + 1)
 
-    let tempLastVisible = lastVisible
-    const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
-    //@ts-ignore
-    tempLastVisible.push(lastVisibleData)
-    await setLastVisible(tempLastVisible)
+    const coinPromise = new Promise(async (resolve, reject) => {
+      await fetch(url)
+        .then(response => {
+          return response.json()
+        })
+        .then(async (data) => {
+          respData = data
+          resolve(respData)
+        });
+    })
 
-    let tempFirstVisible = firstVisible
-    const firstVisibleData = await querySnapshot.docs[0]
-    //@ts-ignore
-    tempFirstVisible.push(firstVisibleData)
-    await setFirstVisible(tempFirstVisible)
+    coinPromise.then(async (data: any) => {
+      setCoinList(data.coins)
+      setPages(data.pages)
+      
+      templastVisbileData.push(data.coins[data.coins.length-1].id)
+      tempfirstVisibleData.push(data.coins[0].id)
+      
+
+      await setLastVisible(templastVisbileData)
+      await setFirstVisible(tempfirstVisibleData)
+
+      await setCurrentPage(currentPage + 1)
+    })
+    
+    console.log(firstVisible)
+    console.log(lastVisible)
+    
+
+    // let listTemp: any = []
+    // //@ts-ignore
+
+    // const next = network.length > 0 ?
+    //   await query(collection(db, "coins"),
+    //     orderBy("votes", "desc"),
+    //     where('status', '==', "approved"),
+    //     where('network', '==', network),
+    //     startAfter(lastVisible[lastVisible.length - 1]),
+    //     limit(rows))
+    //   :
+    //   await query(collection(db, "coins"),
+    //     orderBy("votes", "desc"),
+    //     where('status', '==', "approved"),
+    //     startAfter(lastVisible[lastVisible.length - 1]),
+    //     limit(rows));
+    // const querySnapshot = await getDocs(next);
+    // querySnapshot.forEach(async (doc) => {
+    //   await listTemp.push({
+    //     ...doc.data(),
+    //     id: doc.id,
+    //   })
+    // });
+
+    // await setCurrentPage(currentPage + 1)
+
+    // let tempLastVisible = lastVisible
+    // const lastVisibleData = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // //@ts-ignore
+    // tempLastVisible.push(lastVisibleData)
+    // await setLastVisible(tempLastVisible)
+
+    // let tempFirstVisible = firstVisible
+    // const firstVisibleData = await querySnapshot.docs[0]
+    // //@ts-ignore
+    // tempFirstVisible.push(firstVisibleData)
+    // await setFirstVisible(tempFirstVisible)
 
     // let voteList = await getVoteList(myIP)
     // await populateVotes(listTemp, voteList)
@@ -193,7 +279,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
   const main = async () => {
     let coins = await getCoins()
-    await calculatePages("")
+    // await calculatePages("")
     setLoading(1)
   }
 
@@ -265,6 +351,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const setNetwork = async (network: string) => {
+    setCurrentPage(1)
     if(network == "All") {
       getCoins()
       return
@@ -275,6 +362,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
             })
             .then(data => {
               setCoinList(data.coins)
+              setPages(data.pages)
             });
 
     // await setFirstVisible([])
