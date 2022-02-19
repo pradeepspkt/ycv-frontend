@@ -193,6 +193,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const loadNextPage = async () => {
+    console.log('NETWORK: '+network)
     let url = ""
     let respData:any = []
     let templastVisbileData: any = lastVisible
@@ -231,8 +232,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
       await setCurrentPage(currentPage + 1)
     })
     
-    console.log(firstVisible)
-    console.log(lastVisible)
     
 
     // let listTemp: any = []
@@ -352,18 +351,33 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
   const setNetwork = async (network: string) => {
     setCurrentPage(1)
-    if(network == "All") {
+    setNetworkData(network)
+    setLastVisible([])
+    setFirstVisible([])
+    let templastVisbileData: any = lastVisible
+    let tempfirstVisibleData: any = firstVisible
+    if (network == "All") {
+      setNetworkData('')
       getCoins()
       return
     }
-    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network='+network)
-            .then(response => {
-                return response.json()
-            })
-            .then(data => {
-              setCoinList(data.coins)
-              setPages(data.pages)
-            });
+    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network)
+      .then(response => {
+        return response.json()
+      })
+      .then(async(data) => {
+        setCoinList(data.coins)
+        setPages(data.pages)
+        if((data.coins).length > 0){
+          templastVisbileData.push(data.coins[data.coins.length - 1].id)
+          tempfirstVisibleData.push(data.coins[0].id)
+  
+          await setLastVisible(templastVisbileData)
+          await setFirstVisible(tempfirstVisibleData)
+        }
+        
+
+      });
 
     // await setFirstVisible([])
     // await setLastVisible([])
