@@ -288,7 +288,10 @@ const Main: FC = () => {
               body: JSON.stringify(data),
             })
             .then(response => response.json())
-            .then(data => {
+            .then(async(data) => {
+              await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=' + values.email + '&coin=' + values.symbol + '&status=pending')
+                .then(response => { })
+                .then(data => { });
               console.log('Success:', data);
               toast.success('🦄 Coin submitted successfully! Ready for review.', {
                 position: "bottom-right",
