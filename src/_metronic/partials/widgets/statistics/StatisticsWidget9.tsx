@@ -28,14 +28,14 @@ const StatisticsWidget9: React.FC<Props> = ({
   }, [])
 
   const loadAd = async () => {
-    const docRef = doc(db, "advertisement", 'DWWfffZ59WlZKA7gdbyZ');
-    const docSnap = await getDoc(docRef);
-    let image: any = ''
-    if (docSnap.exists()) {
-      //@ts-ignore
-      image = docSnap.data()
-      await setAd(image)
-    }
+    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getAdvertisement?position=h-br')
+      .then(response => {
+        return response.json()
+      })
+      .then(async (data) => {
+        console.log(data)
+        setAd(data.ad)
+      })
   }
   return (
     //@ts-ignore

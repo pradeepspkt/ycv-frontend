@@ -26,21 +26,7 @@ export function ExploreMain() {
         {/* begin::Card  */}
         <div className='card shadow-none w-100'>
           {/* begin::Header */}
-          <div className='card-header' id='kt_explore_header'>
-            <h5 className='card-title fw-bold text-gray-600'>
-              Explore {process.env.REACT_APP_THEME_NAME}
-            </h5>
-
-            {/* <div className='card-toolbar'>
-              <button
-                type='button'
-                className='btn btn-sm btn-icon explore-btn-dismiss me-n5'
-                id='kt_explore_close'
-              >
-                <KTSVG path='/media/icons/duotune/arrows/arr061.svg' className='svg-icon-2' />
-              </button>
-            </div> */}
-          </div>
+         
           {/* end::Header */}
           {/* begin::Body */}
           <ListsWidget5 className='mb-5 shadow-none' />

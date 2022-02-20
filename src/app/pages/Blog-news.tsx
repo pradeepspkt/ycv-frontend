@@ -33,24 +33,28 @@ const BlogNews: React.FC<Props> = ({
 
 
     useEffect(() => {
-        const getBlogs = async (category: string) => {
-            setBlogs([])
+        const getBlogs = async () => {
             let blogTemp: any = []
-            const querySnapshot = await getDocs(collection(db, "content"));
-            querySnapshot.forEach(async (doc: any) => {
-                if (doc.data().category == category) {
-                    console.log(doc.data().date.toDate().toDateString())
+            fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getContent?category=blog-news')
+            .then(response => {
+                return response.json()
+            })
+            .then(async (data) => {
+                console.log(data.blogs)
+                const blogs = data.blogs
+                blogs.forEach(async(blog:any)=>{
+                    console.log(blog)
                     await blogTemp.push({
                         ...blogTemp,
-                        ...doc.data(),
-                        id: doc.id
+                        ...blog,
+                        id: blog.id
                     })
-                    setBlogs(blogTemp)
-                }
-            });
+                })
+                setBlogs(blogTemp)
+            })
             setLoading(1)
         }
-        getBlogs('blog-news')
+        getBlogs()
     }, [])
 
 
@@ -60,7 +64,7 @@ const BlogNews: React.FC<Props> = ({
                 className='card-xl-stretch mb-5 mb-xl-8'
                 image='/media/svg/brand-logos/vimeo.svg'
                 //@ts-ignore
-                time={String(blog.date.toDate().toDateString())}
+                time={String(blog.date)}
                 //@ts-ignore
                 title={blog.title}
                 //@ts-ignore

@@ -10,6 +10,9 @@ import {
 import { PageTitle } from '../../_metronic/layout/core'
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { BallTriangle, Triangle, CradleLoader } from 'react-loader-spinner'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import {
     FacebookShareButton,
     FacebookIcon,
@@ -67,30 +70,81 @@ const CoinDetails: React.FC<Props> = ({
 
     const [loading, setLoading] = useState(0);
     const [coinDetail, setDetail] = useState({});
+    const [votingStatus, setVotingStatus] = useState(false);
 
     //@ts-ignore
     const { id } = useParams();
 
     useEffect(() => {
-        const getCoinDetail = async () => {
-            const q = query(collection(db, "coins"), where("symbol", "==", id));
-            const querySnapshot = await getDocs(q);
-            querySnapshot.forEach(async (doc) => {
-                // doc.data() is never undefined for query doc snapshots
-                await setDetail(doc.data())
-            });
-        }
         getCoinDetail()
     }, [])
 
+    const getCoinDetail = async () => {
+        await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinDetails?symbol='+id)
+        .then(response => {
+            return response.json()
+        })
+        .then(async (data) => {
+            setDetail(data.ad)
+        })
+    }
 
+
+    const submitVote = async() => {
+        setVotingStatus(true)
+        //@ts-ignore
+        toast.success('Voting for  ' + coinDetail.symbol.toUpperCase() + ' is in progress!', {
+            position: "bottom-right",
+            icon: "🚀",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+      
+          //@ts-ignore
+        await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol=' + coinDetail.symbol + '&docId=' + coinDetail.id)
+            .then(response => {
+                return response.json()
+            })
+            .then(data => {
+                if (data.success) {
+                    toast.success('Vote successfull! Please submit your vote again tomorrow.', {
+                        position: "bottom-right",
+                        icon: "🚀",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
+                } else {
+                    toast.success('Try voting again tomorrow.', {
+                        position: "bottom-right",
+                        icon: "🚀",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                    });
+                }
+
+            });
+        await getCoinDetail()
+        await setVotingStatus(false)
+    }
 
 
     return (
         <>
             <PageTitle breadcrumbs={[]}>{id.toUpperCase()}  Vote your favorite coin!</PageTitle>
-            <div className='row'>
-                <div className='card card-xl-stretch mb-5 mb-xl-8 col-xl-3 m-3'>
+            <div className='row p-2'>
+                <div className='card card-xl-stretch mb-5 mb-xl-8 col-xl-3 mx-10'>
                     <div className='card-body d-flex flex-column pb-10 pb-lg-15'>
                         <div className='flex-grow-1'>
                             <div className='d-flex align-items-center pe-2 mb-8'>
@@ -161,11 +215,34 @@ const CoinDetails: React.FC<Props> = ({
                             </div>
                             <div className='d-flex justify-content-start flex-column mt-3'>
                                 <a  className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
-                                    Votes : <span className="badge badge-square badge-success fs-6 p-3">
-                                        {
+                                    Votes   { 
                                         //@ts-ignore
-                                        coinDetail.votes}
-                                    </span>
+                                        coinDetail.vote && !votingStatus ?
+                                        //@ts-ignore
+                                        //@ts-ignore
+                                        <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
+                                          <button type="button" disabled className="btn btn-default btn-sm"><b>{
+                                            //@ts-ignore
+                                            coinDetail.votes}</b></button>
+                                          <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => {
+                                            //@ts-ignore
+                                            submitVote()
+                                          }}>
+                                            VOTE !
+                                          </button>
+                                        </div> 
+                                        :
+                                        <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
+                                          <button type="button" disabled className="btn btn-default btn-sm"><b>{
+                                            //@ts-ignore
+                                            coinDetail.votes}</b></button>
+                                          <button type='submit' disabled className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true'>
+                                            VOTED
+                                          </button>
+                                        </div> 
+                                      }
+                                      
+                                      
                                 </a>
 
 
@@ -231,29 +308,12 @@ const CoinDetails: React.FC<Props> = ({
 
                             </div>
                         </div>
-                        {
-              //@ts-ignore
-              coinDetail.vote == 1 &&
-              //@ts-ignore
-              <>
-                <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
-                  <button type="button" disabled className="btn btn-default btn-sm"><b>{
-                    //@ts-ignore
-                    item.votes}</b></button>
-                   <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => { 
-                     //@ts-ignore
-                     submitVote(coinDetail.symbol, index, coinDetail.id) 
-                     }}>
-                  VOTE !
-                </button>
-                </div>
-               
-              </>
-            }
+                        
+                        
                     </div>
                 </div>
 
-                <div className='card card-xl-stretch m-3 mb-xl-8 col-xl-8'>
+                <div className='card card-xl-stretch  mb-xl-8 col-xl-8'>
 
                     <div className='card-body d-flex flex-column pb-10 pb-lg-15'>
                         <div className='row'>
