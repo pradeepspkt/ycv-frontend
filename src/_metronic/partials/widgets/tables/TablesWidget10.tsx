@@ -1,60 +1,65 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useState, useEffect } from 'react'
-import { KTSVG, toAbsoluteUrl } from '../../../helpers'
-import { collection, getDocs, deleteDoc, doc, updateDoc, getDoc, query, orderBy, startAfter, limit, setDoc, where, endBefore, startAt } from "firebase/firestore";
-import { app, db } from '../../../../firebase';
-import { ToastContainer, toast } from 'react-toastify';
-import { Link } from 'react-router-dom'
-import 'react-toastify/dist/ReactToastify.css';
-import { useContext } from 'react';
-import { ReactReduxContext } from 'react-redux'
+import React, {useState, useEffect} from 'react'
+import {KTSVG, toAbsoluteUrl} from '../../../helpers'
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore'
+import {app, db} from '../../../../firebase'
+import {ToastContainer, toast} from 'react-toastify'
+import {Link} from 'react-router-dom'
+import 'react-toastify/dist/ReactToastify.css'
+import {useContext} from 'react'
+import {ReactReduxContext} from 'react-redux'
 
 type Props = {
-  className: string,
+  className: string
   hideViewAllButton?: Boolean
 }
 
-const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
-  const [coinList, setCoinList] = useState([]);
-  const [myIP, setIP] = useState('');
-  const [network, setNetworkData] = useState('');
-  const [voteList, setVoteList] = useState([]);
-  const [loading, setLoading] = useState(0);
-  const [lastVisible, setLastVisible] = useState([]);
-  const [firstVisible, setFirstVisible] = useState([]);
-  const [previousStart, setPreviousStart] = useState({});
+const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
+  const [coinList, setCoinList] = useState([])
+  const [myIP, setIP] = useState('')
+  const [network, setNetworkData] = useState('')
+  const [voteList, setVoteList] = useState([])
+  const [loading, setLoading] = useState(0)
+  const [lastVisible, setLastVisible] = useState([])
+  const [firstVisible, setFirstVisible] = useState([])
+  const [previousStart, setPreviousStart] = useState({})
   const [currentPage, setCurrentPage] = useState(1)
   const [pages, setPages] = useState(null)
   const [rows, setRows] = useState(10)
   // const [selectedNetwork, setNetwork] = useState('BSC')
-  const { store } = useContext(ReactReduxContext)
+  const {store} = useContext(ReactReduxContext)
 
   useEffect(() => {
     main()
-
   }, [])
-
 
   const calculatePages = async (networkData: string) => {
     //get approved coins count pages
     let dataCount: number = 1
     // let qAll;
 
+    const qAll =
+      (await networkData.length) > 0
+        ? query(
+            collection(db, 'coins'),
+            where('status', '==', 'approved'),
+            where('network', '==', networkData)
+          )
+        : query(collection(db, 'coins'), where('status', '==', 'approved'))
 
-    const qAll = await networkData.length > 0 ?
-      query(collection(db, "coins"), where('status', '==', "approved"), where("network", "==", networkData))
-      :
-      query(collection(db, "coins"), where('status', '==', "approved"))
-
-
-    const querySnapshotAll = await getDocs(qAll);
+    const querySnapshotAll = await getDocs(qAll)
     //@ts-ignore
     querySnapshotAll.forEach(async (doc) => {
       dataCount = dataCount + 1
-    });
- 
+    })
+
     const pages = await round(dataCount / rows, 1)
-    //@ts-ignore  
+    //@ts-ignore
     await setPages(pages)
     return pages
   }
@@ -63,18 +68,19 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setLoading(0)
     // setPromotedList([])
     let listTemp: any = []
-    let lastVisbileData: any = [], firstVisibleData: any = []
+    let lastVisbileData: any = [],
+      firstVisibleData: any = []
     let respData: any = []
 
     const coinPromise = new Promise(async (resolve, reject) => {
       await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll')
-        .then(response => {
+        .then((response) => {
           return response.json()
         })
         .then(async (data) => {
           respData = data
           resolve(respData)
-        });
+        })
     })
 
     coinPromise.then(async (data: any) => {
@@ -86,10 +92,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
       await setFirstVisible(firstVisibleData)
     })
 
-
-   
-
-
     // //get approved coins with limit
     // const q = query(collection(db, "coins"), where('status', '==', "approved"), orderBy("votes", "desc"), limit(rows));
     // const querySnapshot = await getDocs(q);
@@ -99,7 +101,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     //     id: doc.id,
     //   })
     // });
-
 
     // let tempLastVisible: any = []
     // const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
@@ -118,31 +119,36 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const loadPrevPage = async () => {
     //@ts-ignore
 
-    let url = ""
-    const nextQuery = network.length > 0 ?
-    //@ts-ignore
-      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network + '&startAt=' + firstVisible[firstVisible.length - 2]
-      :
-      //@ts-ignore
-      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAt=' + firstVisible[firstVisible.length - 2]
-
+    let url = ''
+    const nextQuery =
+      network.length > 0
+        ? //@ts-ignore
+          (url =
+            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' +
+            network +
+            '&startAt=' +
+            firstVisible[firstVisible.length - 2])
+        : //@ts-ignore
+          (url =
+            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAt=' +
+            firstVisible[firstVisible.length - 2])
 
     fetch(url)
-      .then(response => {
+      .then((response) => {
         return response.json()
       })
-      .then(async(data) => {
+      .then(async (data) => {
         setCoinList(data.coins)
         setPages(data.pages)
-        let lastVisbileData: any = lastVisible, firstVisibleData: any = firstVisible
+        let lastVisbileData: any = lastVisible,
+          firstVisibleData: any = firstVisible
         await firstVisibleData.pop()
         await lastVisbileData.pop()
 
-
         setLastVisible(lastVisbileData)
         setFirstVisible(firstVisibleData)
-        setCurrentPage(currentPage-1)
-      });
+        setCurrentPage(currentPage - 1)
+      })
 
     // let listTemp: any = []
     // let tempLastVisible = lastVisible
@@ -183,51 +189,50 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     // //@ts-ignore
     // tempLastVisible.push(lastVisibleData)
     // await setLastVisible(tempLastVisible)
-
-
-
   }
 
   const loadNextPage = async () => {
-    let url = ""
-    let respData:any = []
+    let url = ''
+    let respData: any = []
     let templastVisbileData: any = lastVisible
     let tempfirstVisibleData: any = firstVisible
 
-    const nextQuery = network.length > 0 ?
-    //@ts-ignore
-      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network + '&startAfter=' + lastVisible[lastVisible.length - 1]
-      :
-      //@ts-ignore
-      url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAfter=' + lastVisible[lastVisible.length - 1]
-
+    const nextQuery =
+      network.length > 0
+        ? //@ts-ignore
+          (url =
+            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' +
+            network +
+            '&startAfter=' +
+            lastVisible[lastVisible.length - 1])
+        : //@ts-ignore
+          (url =
+            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAfter=' +
+            lastVisible[lastVisible.length - 1])
 
     const coinPromise = new Promise(async (resolve, reject) => {
       await fetch(url)
-        .then(response => {
+        .then((response) => {
           return response.json()
         })
         .then(async (data) => {
           respData = data
           resolve(respData)
-        });
+        })
     })
 
     coinPromise.then(async (data: any) => {
       setCoinList(data.coins)
       setPages(data.pages)
-      
-      templastVisbileData.push(data.coins[data.coins.length-1].id)
+
+      templastVisbileData.push(data.coins[data.coins.length - 1].id)
       tempfirstVisibleData.push(data.coins[0].id)
-      
 
       await setLastVisible(templastVisbileData)
       await setFirstVisible(tempfirstVisibleData)
 
       await setCurrentPage(currentPage + 1)
     })
-    
-    
 
     // let listTemp: any = []
     // //@ts-ignore
@@ -285,63 +290,55 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     await setCoinList(tempCoins)
     await renderList
 
-    toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
-      position: "bottom-right",
-      icon: "🚀",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
 
-
-    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
-            .then(response => {
-                return response.json()
-            })
-            .then(data => {
-              if(data.success){
-                toast.success('Vote successfull! Please submit your vote again tomorrow.', {
-                  position: "bottom-right",
-                  icon: "🚀",
-                  autoClose: 5000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-              }else{
-                toast.success('Try voting again tomorrow.', {
-                  position: "bottom-right",
-                  icon: "🚀",
-                  autoClose: 5000,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: true,
-                  draggable: true,
-                  progress: undefined,
-                });
-              }
-              
-            });
+    await fetch(
+      'https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol=' +
+        coin +
+        '&docId=' +
+        id
+    )
+      .then((response) => {
+        return response.json()
+      })
+      .then((data) => {
+        if (data.success) {
+          toast.success(
+            coin.toUpperCase() + ' : Vote successfull! Please submit your vote again tomorrow.',
+            {
+              position: 'bottom-right',
+              icon: '🚀',
+              autoClose: 5000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            }
+          )
+        } else {
+          toast.success('Try voting again tomorrow.', {
+            position: 'bottom-right',
+            icon: '🚀',
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          })
+        }
+      })
 
     await main()
   }
 
-  const setNetworkState = async (network: string) => {
-    await setNetworkData(network)
-    return network
-  }
 
   function round(val: any, multiplesOf: any) {
-    var s = 1 / multiplesOf;
-    var res = Math.ceil(val * s) / s;
-    res = res < val ? res + multiplesOf : res;
-    var afterZero = multiplesOf.toString().split(".")[1];
-    return parseFloat(res.toFixed(afterZero ? afterZero.length : 0));
+    var s = 1 / multiplesOf
+    var res = Math.ceil(val * s) / s
+    res = res < val ? res + multiplesOf : res
+    var afterZero = multiplesOf.toString().split('.')[1]
+    return parseFloat(res.toFixed(afterZero ? afterZero.length : 0))
   }
 
   const setNetwork = async (network: string) => {
@@ -351,66 +348,26 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     setFirstVisible([])
     let templastVisbileData: any = lastVisible
     let tempfirstVisibleData: any = firstVisible
-    if (network == "All") {
+    if (network == 'All') {
       setNetworkData('')
       getCoins()
       return
     }
-    fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network)
-      .then(response => {
+    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network)
+      .then((response) => {
         return response.json()
       })
-      .then(async(data) => {
+      .then(async (data) => {
         setCoinList(data.coins)
         setPages(data.pages)
-        if((data.coins).length > 0){
+        if (data.coins.length > 0) {
           templastVisbileData.push(data.coins[data.coins.length - 1].id)
           tempfirstVisibleData.push(data.coins[0].id)
-  
+
           await setLastVisible(templastVisbileData)
           await setFirstVisible(tempfirstVisibleData)
         }
-        
-
-      });
-
-    // await setFirstVisible([])
-    // await setLastVisible([])
-    // //@ts-ignore
-    // await setCurrentPage(1)
-
-    // if (network == 'All') {
-    //   await setNetworkData('')
-    //   await main()
-    //   return
-    // }
-    // let networkValue = await setNetworkState(network)
-    // let pages = await calculatePages(networkValue)
-    // let listTemp: any = []
-    // const q = query(collection(db, "coins"), where("network", "==", network), limit(rows));
-    // const querySnapshot = await getDocs(q);
-    // querySnapshot.forEach(async (doc) => {
-    //   // doc.data() is never undefined for query doc snapshots
-    //   await listTemp.push({
-    //     ...doc.data(),
-    //     id: doc.id,
-    //   })
-    // });
-
-    // let tempLastVisible: any = []
-    // const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-    // tempLastVisible.push(lastVisible)
-    // await setLastVisible(tempLastVisible)
-
-    // let tempFirstVisible: any = []
-    // const firstVisible = await querySnapshot.docs[0]
-    // tempFirstVisible.push(firstVisible)
-    // await setFirstVisible(tempFirstVisible)
-
-    // // let voteList = await getVoteList(myIP)
-    // let coins = listTemp
-    // // await populateVotes(coins, voteList)
-    // await setCoinList(listTemp)
+      })
   }
 
   const renderList = coinList.map((item, index) => {
@@ -430,10 +387,13 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
               </span>
             </div>
             <div className='d-flex justify-content-start flex-column'>
-              <a href={
-                //@ts-ignore
-                '/coin-details/' + item.symbol
-              } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+              <a
+                href={
+                  //@ts-ignore
+                  '/coin-details/' + item.symbol
+                }
+                className='text-dark fw-bolder text-hover-primary mb-1 fs-6'
+              >
                 {
                   //@ts-ignore
                   item.symbol.toUpperCase()
@@ -463,18 +423,20 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 
           </div>
         </td> */}
-        <td className="d-none d-lg-table-cell">
+        <td className='d-none d-lg-table-cell'>
           <div className='d-flex justify-content-start flex-column mt-4'>
-            <a href={
-              //@ts-ignore
-              '/coin-details/' + item.symbol
-            } className='text-dark fw-bolder text-hover-primary mb-1 fs-6'>
+            <a
+              href={
+                //@ts-ignore
+                '/coin-details/' + item.symbol
+              }
+              className='text-dark fw-bolder text-hover-primary mb-1 fs-6'
+            >
               {
                 //@ts-ignore
                 item.name.toUpperCase()
               }
             </a>
-
           </div>
         </td>
         {/* <td className="d-none d-lg-table-cell">
@@ -495,18 +457,28 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
 </a>
     <span className='text-dark fw-bold text-dark d-block fs-7'>$0.0...02877</span>
   </td> */}
-        <td className="d-none d-lg-table-cell">
+        <td className='d-none d-lg-table-cell'>
           {
             //@ts-ignore
-            item.network ? item.network.toUpperCase() : 'NA'}
+            item.network ? item.network.toUpperCase() : 'NA'
+          }
         </td>
-        <td className="d-none d-lg-table-cell">
+        <td className='d-none d-lg-table-cell'>
           {/* <a href='#' className='text-dark fw-bolder text-hover-primary d-block mb-1 fs-6'>
 $308,236,260
 </a> */}
-          <span className='text-dark fw-bold text-dark d-block fs-7 mt-4'>{
-            //@ts-ignore
-            item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
+          <span className='text-dark fw-bold text-dark d-block fs-7 mt-4'>
+            {
+              //@ts-ignore
+              item.mCap == 0
+                ? '--'
+                : '$' +
+                //@ts-ignore
+                  Number(item.mCap)
+                    .toFixed(2)
+                    .replace(/\d(?=(\d{3})+\.)/g, '$&,')
+            }
+          </span>
         </td>
 
         <td>
@@ -516,49 +488,79 @@ $308,236,260
         item.vote ? 'VOTE' : 'VOTED'}
     </button> */}
 
-
           {
             //@ts-ignore
-            item.vote == 1 &&
+            item.vote == 1 && (
+              //@ts-ignore
+              <div
+                className='btn-group border border-success rounded'
+                role='group'
+                aria-label='Basic example'
+              >
+                <button type='button' disabled className='btn btn-default btn-sm'>
+                  <b>
+                    {
+                      //@ts-ignore
+                      item.votes
+                    }
+                  </b>
+                </button>
+                <button
+                  type='submit'
+                  className='btn btn-sm btn-primary pl-2 pr-5'
+                  data-kt-menu-dismiss='true'
+                  onClick={() => {
+                    //@ts-ignore
+                    submitVote(item.symbol, index, item.id)
+                  }}
+                >
+                  VOTE !
+                </button>
+              </div>
+            )
+          }
+          {
             //@ts-ignore
-            <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
-              <button type="button" disabled className="btn btn-default btn-sm"><b>{
-                //@ts-ignore
-                item.votes}</b></button>
-              <button type='submit' className='btn btn-sm btn-primary pl-2 pr-5' data-kt-menu-dismiss='true' onClick={() => {
-                //@ts-ignore
-                submitVote(item.symbol, index, item.id)
-              }}>
-                VOTE !
+            item.vote == 0 && (
+              <div
+                className='btn-group border border-success rounded'
+                role='group'
+                aria-label='Basic example'
+              >
+                <button type='button' disabled className='btn btn-default btn-sm'>
+                  {
+                    //@ts-ignore
+                    item.votes
+                  }
+                </button>
+                <button
+                  type='submit'
+                  disabled
+                  className='btn btn-sm btn-primary'
+                  data-kt-menu-dismiss='true'
+                >
+                  VOTED
+                </button>
+              </div>
+            )
+          }
+          {
+            //@ts-ignore
+            item.vote == 2 && (
+              <button
+                type='submit'
+                disabled
+                className='btn btn-sm btn-primary'
+                data-kt-menu-dismiss='true'
+              >
+                Voting..
               </button>
-            </div>
+            )
           }
-          {
-            //@ts-ignore
-            item.vote == 0 &&
-            <div className="btn-group border border-success rounded" role="group" aria-label="Basic example">
-              <button type="button" disabled className="btn btn-default btn-sm">{
-                //@ts-ignore
-                item.votes}</button>
-              <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-                VOTED
-              </button>
-            </div>
-
-          }
-          {
-            //@ts-ignore
-            item.vote == 2 &&
-            <button type='submit' disabled className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
-              Voting..
-            </button>
-          }
-
         </td>
       </tr>
     )
-  }
-  );
+  })
 
   return (
     <div className={`card ${className}`}>
@@ -575,14 +577,15 @@ $308,236,260
           data-bs-trigger='hover'
           title='Select network'
         >
-
           <ul className='nav'>
             <li className='nav-item'>
               <a
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary active fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('All') }}
+                onClick={() => {
+                  setNetwork('All')
+                }}
               >
                 All
               </a>
@@ -592,7 +595,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4 me-1'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_1'
-                onClick={() => { setNetwork('BSC') }}
+                onClick={() => {
+                  setNetwork('BSC')
+                }}
               >
                 BSC
               </a>
@@ -602,7 +607,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4 me-1'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_2'
-                onClick={() => { setNetwork('ETH') }}
+                onClick={() => {
+                  setNetwork('ETH')
+                }}
               >
                 ETH
               </a>
@@ -612,7 +619,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('MATIC') }}
+                onClick={() => {
+                  setNetwork('MATIC')
+                }}
               >
                 MATIC
               </a>
@@ -622,7 +631,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('TRX') }}
+                onClick={() => {
+                  setNetwork('TRX')
+                }}
               >
                 TRX
               </a>
@@ -632,7 +643,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('FTM') }}
+                onClick={() => {
+                  setNetwork('FTM')
+                }}
               >
                 FTM
               </a>
@@ -642,7 +655,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('SOL') }}
+                onClick={() => {
+                  setNetwork('SOL')
+                }}
               >
                 SOL
               </a>
@@ -652,7 +667,9 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('KCC') }}
+                onClick={() => {
+                  setNetwork('KCC')
+                }}
               >
                 KCC
               </a>
@@ -662,18 +679,21 @@ $308,236,260
                 className='nav-link btn btn-sm btn-color-muted btn-active btn-active-light-primary fw-bolder px-4'
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
-                onClick={() => { setNetwork('Other') }}
+                onClick={() => {
+                  setNetwork('Other')
+                }}
               >
                 Other
               </a>
             </li>
           </ul>
-          {
-            hideViewAllButton ?
-              null :
-              <Link to="/all-coins" className="btn btn-sm btn-light-primary"> <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
-                View All</Link>
-          }
+          {hideViewAllButton ? null : (
+            <Link to='/all-coins' className='btn btn-sm btn-light-primary'>
+              {' '}
+              <KTSVG path='media/icons/duotune/arrows/arr075.svg' className='svg-icon-3' />
+              View All
+            </Link>
+          )}
           {/* <a
             href='#'
             className='btn btn-sm btn-light-primary'
@@ -691,31 +711,29 @@ $308,236,260
         {/* begin::Table container */}
         <div className='table-responsive'>
           {/* begin::Table */}
-          <table className='table table-rounded table-striped border border-gray-300 gy-2 gs-5 table-hover'>
+          <table className='table table-rounded table-striped border border-gray-300 gy-2 gs-3 table-hover'>
             {/* begin::Table head */}
             <thead>
               <tr className='fw-bolder text-muted fw-bold fs-6 text-gray-800 border border-gray-200 h-50px pb-5 bg-light'>
                 {/* <th className='min-w-100px'>Avatar</th> */}
-                <th className='min-w-200px'>Coin</th>
+                <th className='min-w-150px rounded-start'>Coin</th>
                 <th className='min-w-250px d-none d-lg-table-cell'>Name</th>
                 <th className='ps-4 min-w-200px rounded-start d-none d-lg-table-cell'>Network</th>
 
                 <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>
                 {/* <th className='min-w-100px'>Price</th> */}
                 {/* <th className='min-w-200px'>Votes</th> */}
-                <th className='min-w-10px text-start rounded-end'>Votes</th>
-
+                <th className='min-w-150px'>Votes</th>
               </tr>
             </thead>
             {/* end::Table head */}
             {/* begin::Table body */}
             <tbody>
-              {renderList.length > 0 ?
+              {renderList.length > 0 ? (
                 renderList
-                :
-                <div className='m-5 mt-5 mb-5'>
-                  Coins not found.
-                </div>}
+              ) : (
+                <div className='m-5 mt-5 mb-5'>Coins not found.</div>
+              )}
               {/* <tr>
                 <td>
                   <div className='form-check form-check-sm form-check-custom form-check-solid'>
@@ -1006,10 +1024,25 @@ $308,236,260
             <span className='mt-5 align-items-start flex-column'>
               Page {currentPage} of {pages}
             </span>
-            <ul className="pagination pagination-outline mt-3">
-              <li className={currentPage > 1 ? "page-item previous m-1" : "page-item previous disabled m-1"}><a onClick={loadPrevPage} className="page-link"><i className="previous"></i></a></li>
-              <li className={currentPage == pages ? "page-item next m-1 disabled" : "page-item next m-1"}><a onClick={loadNextPage} className="page-link"><i className="next"></i></a></li>
-
+            <ul className='pagination pagination-outline mt-3'>
+              <li
+                className={
+                  currentPage > 1 ? 'page-item previous m-1' : 'page-item previous disabled m-1'
+                }
+              >
+                <a onClick={loadPrevPage} className='page-link'>
+                  <i className='previous'></i>
+                </a>
+              </li>
+              <li
+                className={
+                  currentPage == pages ? 'page-item next m-1 disabled' : 'page-item next m-1'
+                }
+              >
+                <a onClick={loadNextPage} className='page-link'>
+                  <i className='next'></i>
+                </a>
+              </li>
             </ul>
           </div>
           {/* end::Table */}
@@ -1018,7 +1051,7 @@ $308,236,260
       </div>
       {/* begin::Body */}
       <ToastContainer
-        position="bottom-right"
+        position='bottom-right'
         autoClose={10000}
         hideProgressBar={false}
         newestOnTop
@@ -1032,4 +1065,4 @@ $308,236,260
   )
 }
 
-export { TablesWidget10 }
+export {TablesWidget10}

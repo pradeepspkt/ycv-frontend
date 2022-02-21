@@ -70,15 +70,15 @@ const DashboardPage: FC = () => (
         </div>
       </div>
     </div> */}
-    <div className='row g-5 g-xl-8'>
+    <div className='row g-6 g-xl-8'>
       <div className='col-xxl-4'>
         <TablesWidget6
           className='card-xl-stretch mb-xl-8'
         />
       </div>
-      <div className='col-xl-8'>
-        <div className='row'>
-          <div className='col-xl-3'>
+      <div className='col-xxl-8'>
+        <div className='row mb-5 mb-xl-0'>
+          <div className='col-xl-3 mb-4 mb-xl-0'>
             <StatisticsWidget5
               className='card-xl-stretch mb-xl-8'
               svgIcon='/media/icons/duotune/general/gen032.svg'
@@ -114,8 +114,8 @@ const DashboardPage: FC = () => (
       <TablesWidget10 className='card-xxl-stretch mb-5 mb-xl-8' />
     </div>
 
-    <div className='row' >
-      <div className='col-xl-6 '>
+    <div className='row mb-5 mb-xl-0'>
+      <div className='col-xl-6 mb-4 mb-xl-0'>
       <StatisticsWidget8
               className='card-xl-stretch mb-xl-8'
               svgIcon='/media/icons/duotune/general/gen032.svg'
@@ -139,7 +139,7 @@ const DashboardPage: FC = () => (
 
 
     <div className='row' >
-      <div className='col-xl-6 '>
+      <div className='col-xl-6 mb-5 mb-xl-0'>
         <FooterLeft
           className='card-xl-stretch mb-xl-8'
           svgIcon='/media/icons/duotune/general/gen032.svg'
@@ -197,7 +197,7 @@ const DashboardWrapper: FC = () => {
   // const data = response.json();
 
   const [count, setCount] = useState(0)
-  const [title, setTitle] = useState('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')
+  const [title, setTitle] = useState('Best Coins Today')
 
   useEffect(() => {
     let count = 0
@@ -208,7 +208,8 @@ const DashboardWrapper: FC = () => {
         count += 1
       });
       setCount(count)
-      setTitle('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')
+      // setTitle('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')
+      setTitle('Best Coins Today')
     }
     getCount()
   }, [])

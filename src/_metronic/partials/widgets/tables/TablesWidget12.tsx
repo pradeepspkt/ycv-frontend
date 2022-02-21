@@ -50,16 +50,16 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     tempCoins[index].vote = 2
     await setPromotedList(tempCoins)
     // await renderList
-    toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
-      position: "bottom-right",
-      icon: "🚀",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
+    // toast.success('Voting for  ' + coin.toUpperCase() + ' is in progress!', {
+    //   position: "bottom-right",
+    //   icon: "🚀",
+    //   autoClose: 5000,
+    //   hideProgressBar: false,
+    //   closeOnClick: true,
+    //   pauseOnHover: true,
+    //   draggable: true,
+    //   progress: undefined,
+    // });
     
     await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
             .then(response => {
@@ -67,7 +67,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
             })
             .then(data => {
               if(data.success){
-                toast.success('Vote successfull! Please submit your vote again tomorrow.', {
+                toast.success(coin.toUpperCase()+' : Vote successfull! Please submit your vote again tomorrow.', {
                   position: "bottom-right",
                   icon: "🚀",
                   autoClose: 5000,
@@ -319,7 +319,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
             {/* begin::Table head */}
             <thead>
               <tr className='fw-bolder bg-light h-50px'>
-                <th className='ps-4 min-w-200px rounded-start'>Name</th>
+                <th className='ps-4 min-w-150px rounded-start'>Name</th>
                 <th className='ps-4 min-w-200px rounded-start d-none d-lg-table-cell'>Network</th>
                 {/* <th className='min-w-125px'>Price</th> */}
                 <th className='min-w-200px d-none d-lg-table-cell'>Market Cap</th>

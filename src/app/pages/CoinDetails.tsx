@@ -144,7 +144,7 @@ const CoinDetails: React.FC<Props> = ({
         <>
             <PageTitle breadcrumbs={[]}>{id.toUpperCase()}  Vote your favorite coin!</PageTitle>
             <div className='row p-2'>
-                <div className='card card-xl-stretch mb-5 mb-xl-8 col-xl-3 mx-10'>
+                <div className='card card-xl-stretch mb-5 mb-xl-8 col-xl-3 mx-xl-10 mt-5 mt-xl-0'>
                     <div className='card-body d-flex flex-column pb-10 pb-lg-15'>
                         <div className='flex-grow-1'>
                             <div className='d-flex align-items-center pe-2 mb-8'>
@@ -253,7 +253,7 @@ const CoinDetails: React.FC<Props> = ({
                                     <div className='col-xl-12 mt-5'>
 
                                         <FacebookShareButton
-                                            url={"http://www.yourcryptovoice.com/coin-details/" + id}
+                                            url={"https://www.yourcryptovoice.com/coin-details/" + id}
                                             quote={id.toUpperCase() + "- Your Crypto Voice, Vote your favorite coin today."}
                                             hashtag={"#yourcryptovoice"}
                                         //@ts-ignore
@@ -264,7 +264,7 @@ const CoinDetails: React.FC<Props> = ({
                                             <FacebookIcon size={36} />
                                         </FacebookShareButton>
                                         <TwitterShareButton
-                                            url={"http://www.yourcryptovoice.com/coin-details/" + id}
+                                            url={"https://www.yourcryptovoice.com/coin-details/" + id}
                                             title={id.toUpperCase() + "- Your Crypto Voice, Vote your favorite coin today."}
                                         // hashtag="#camperstribe"
                                         //  className={classes.socialMediaButton}
@@ -272,7 +272,7 @@ const CoinDetails: React.FC<Props> = ({
                                             <TwitterIcon size={36} />
                                         </TwitterShareButton>
                                         <WhatsappShareButton
-                                            url={"http://www.yourcryptovoice.com/coin-details/" + id}
+                                            url={"https://www.yourcryptovoice.com/coin-details/" + id}
                                             title={id.toUpperCase() + "- Your Crypto Voice, Vote your favorite coin today."}
                                             separator=":: "
                                         //  className={classes.socialMediaButton}
@@ -280,7 +280,7 @@ const CoinDetails: React.FC<Props> = ({
                                             <WhatsappIcon size={36} />
                                         </WhatsappShareButton>
                                         <TelegramShareButton
-                                            url={"http://www.yourcryptovoice.com/coin-details/" + id}
+                                            url={"https://www.yourcryptovoice.com/coin-details/" + id}
                                             title={id.toUpperCase() + "- Your Crypto Voice, Vote your favorite coin today."}
                                         // separator=":: "
                                         //  className={classes.socialMediaButton}
@@ -288,7 +288,7 @@ const CoinDetails: React.FC<Props> = ({
                                             <TelegramIcon size={36} />
                                         </TelegramShareButton>
                                         <LinkedinShareButton
-                                            url={"http://www.yourcryptovoice.com/coin-details/" + id}
+                                            url={"https://www.yourcryptovoice.com/coin-details/" + id}
                                             title={id.toUpperCase() + "- Your Crypto Voice, Vote your favorite coin today."}
                                         // separator=":: "
                                         //  className={classes.socialMediaButton}
@@ -335,10 +335,7 @@ const CoinDetails: React.FC<Props> = ({
 
                         <div className='flex-grow-1'>
                             <div className='col-xl-8 m-5'>
-                                <a href={
-                                    //@ts-ignore
-                                    '/coin-details/aa'
-                                } className='text-dark fw-bolder text-hover-primary mb-1 m-2 '>
+                                <a  className='text-dark fw-bolder text-hover-primary mb-1 m-2 '>
                                     Contract Address:
                                 </a>
 
