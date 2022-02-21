@@ -195,7 +195,6 @@ const DashboardWrapper: FC = () => {
   // const response = fetch('https://geolocation-db.com/json/');
   // //@ts-ignore
   // const data = response.json();
-  // console.log(data)
 
   const [count, setCount] = useState(0)
   const [title, setTitle] = useState('Best Coins Today (TOTAL COINS REGISTERED : '+count+')')

@@ -34,7 +34,6 @@ const StatisticsWidget5: React.FC<Props> = ({
         return response.json()
       })
       .then(async (data) => {
-        console.log(data)
         setAd(data.ad)
       })
   }

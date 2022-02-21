@@ -117,7 +117,6 @@ const Main: FC = () => {
 
   const selectChange = async(event) => {
     await setNetwork(event.target.value)
-    console.log(network)
   }
 
 
@@ -127,7 +126,6 @@ const Main: FC = () => {
   }
 
   const handleChange = async (e: any) => {
-    console.log(await e.target.files[0])
     await setFile(await e.target.files[0]);
     let reader = new FileReader();
     await reader.readAsDataURL(await e.target.files[0]);
@@ -151,7 +149,6 @@ const Main: FC = () => {
   //   })
   //   .then(response => response.json())
   //   .then(data => {
-  //     console.log('Success:', data);
   //   })
   //   .catch((error) => {
   //     console.error('Error:', error);
@@ -221,10 +218,8 @@ const Main: FC = () => {
 
           switch (snapshot.state) {
             case 'paused':
-              console.log('Upload is paused');
               break;
             case 'running':
-              console.log('Upload is running');
               break;
           }
         },
@@ -292,7 +287,6 @@ const Main: FC = () => {
               await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=' + values.email + '&coin=' + values.symbol + '&status=pending')
                 .then(response => { })
                 .then(data => { });
-              console.log('Success:', data);
               toast.success('🦄 Coin submitted successfully! Ready for review.', {
                 position: "bottom-right",
                 autoClose: 10000,
@@ -318,10 +312,6 @@ const Main: FC = () => {
       );
 
 
-      // uploadString(storageRef, imageURL, 'base64').then((snapshot) => {
-      //   console.log('Uploaded a base64 string!');
-      //   console.log(snapshot)
-      // });
 
 
 

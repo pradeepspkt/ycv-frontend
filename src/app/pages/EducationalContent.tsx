@@ -40,10 +40,8 @@ const EducationalContent: React.FC<Props> = ({
                 return response.json()
             })
             .then(async (data) => {
-                console.log(data.blogs)
                 const blogs = data.blogs
                 blogs.forEach(async(blog:any)=>{
-                    console.log(blog)
                     await blogTemp.push({
                         ...blogTemp,
                         ...blog,

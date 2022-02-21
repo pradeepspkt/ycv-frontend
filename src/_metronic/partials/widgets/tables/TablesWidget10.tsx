@@ -52,8 +52,7 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     querySnapshotAll.forEach(async (doc) => {
       dataCount = dataCount + 1
     });
-    console.log('NETWORK: ' + networkData)
-    console.log('data: ' + dataCount)
+ 
     const pages = await round(dataCount / rows, 1)
     //@ts-ignore  
     await setPages(pages)
@@ -120,7 +119,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
     //@ts-ignore
 
     let url = ""
-    console.log(lastVisible)
     const nextQuery = network.length > 0 ?
     //@ts-ignore
       url = 'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network + '&startAt=' + firstVisible[firstVisible.length - 2]
@@ -140,8 +138,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
         await firstVisibleData.pop()
         await lastVisbileData.pop()
 
-        console.log(firstVisible)
-        console.log(lastVisible)
 
         setLastVisible(lastVisbileData)
         setFirstVisible(firstVisibleData)
@@ -193,7 +189,6 @@ const TablesWidget10: React.FC<Props> = ({ className, hideViewAllButton }) => {
   }
 
   const loadNextPage = async () => {
-    console.log('NETWORK: '+network)
     let url = ""
     let respData:any = []
     let templastVisbileData: any = lastVisible

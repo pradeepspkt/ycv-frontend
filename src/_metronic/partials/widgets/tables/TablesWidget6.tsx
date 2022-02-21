@@ -23,7 +23,6 @@ const TablesWidget6: React.FC<Props> = ({ className }) => {
   const loadTrendingTokens = async (timeframe:string) => {
     const response = await fetch('https://api.coinmarketcap.com/data-api/v3/topsearch/rank?timeframe='+timeframe);
     const data = await response.json();
-    console.log(data.data.cryptoTopSearchRanks)
     await setCoinList(data.data.cryptoTopSearchRanks)
 
   }

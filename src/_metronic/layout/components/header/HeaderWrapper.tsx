@@ -48,22 +48,19 @@ export function HeaderWrapper() {
         </div>
 
         <div className='header-logo me-5 me-md-10 flex-grow-1 flex-lg-grow-0'>
-          {/* <Link to='/'>
+           <Link to='/'>
             <img
               alt='Logo'
-              src={toAbsoluteUrl('/media/logos/logo-4.png')}
-              className='logo-default h-25px'
+              src={toAbsoluteUrl('/media/logos/logo-5.png')}
+              className='logo-default h-50px'
             />
             <img
               alt='Logo'
               src={toAbsoluteUrl('/media/logos/logo-5.png')}
-              className='logo-sticky h-25px'
+              className='logo-sticky h-40px'
             />
-          </Link> */}
-          {/* <span className='text-white fw-bold menu-title'>
-          YOUR CRYPTO VOICE
-                      </span> */}
-                      <span className="badge badge-square badge-primary fs-4 p-7">YOUR CRYPTO VOICE</span>
+          </Link> 
+          
         </div>
 
         {/* begin::Wrapper */}
