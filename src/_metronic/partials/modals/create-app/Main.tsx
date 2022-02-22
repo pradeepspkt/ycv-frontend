@@ -101,6 +101,8 @@ const Main: FC = () => {
 
   const [file, setFile] = useState(null)
   const [imageURL, setURL] = useState('')
+  const [checkboxValue, setCheckboxValue] = useState(false)
+
 
   const storage = getStorage()
   //@ts-ignore
@@ -115,6 +117,15 @@ const Main: FC = () => {
 
   const selectChange = async (event) => {
     await setNetwork(event.target.value)
+  }
+
+  const toggleCheckbox = async () =>{
+    await setCheckboxValue(!checkboxValue)
+    if(checkboxValue){
+      await disableSubmitButton(true)
+    }else{
+     await  disableSubmitButton(false)
+    }
   }
 
   const toggleShowSnack = () => setShowSnack(!showSnack)
@@ -153,6 +164,18 @@ const Main: FC = () => {
     stepper.current = StepperComponent.createInsance(stepperRef.current as HTMLDivElement)
   }
 
+  const disableSubmitButton =  async(action:any) => {
+    let modalBody = document.querySelector('.modal-body')
+      let buttonElements = modalBody?.querySelectorAll('button')
+    if(action){
+      //@ts-ignore
+      buttonElements[1].disabled = true
+    }else{
+      //@ts-ignore
+      buttonElements[1].disabled = false
+    }
+  }
+
   const prevStep = () => {
     if (!stepper.current) {
       return
@@ -165,7 +188,6 @@ const Main: FC = () => {
 
   const submitStep = async (values: ICreateAccount, actions: FormikValues) => {
     //@ts-ignore
-    console.log(stepper.current.currentStepIndex)
     //@ts-ignore
     if (!file?.name) {
       //@ts-ignore
@@ -180,8 +202,6 @@ const Main: FC = () => {
       return
     } else {
       // var dimensions = sizeOf(file)
-      // console.log(dimensions.width, dimensions.height)
-      console.log(file)
       var reader = new FileReader()
       //Read the contents of Image File.
       reader.readAsDataURL(file)
@@ -197,8 +217,6 @@ const Main: FC = () => {
         image.onload = async function () {
           var height = this.height
           var width = this.width
-          console.log(height)
-          console.log(width)
           if (height > 96 || width > 96) {
             //show width and height to user
             alert('Logo Height and Width must not exceed 90px.')
@@ -209,6 +227,11 @@ const Main: FC = () => {
           // return true
         }
       }
+    }
+
+    //@ts-ignore
+    if(stepper.current.currentStepIndex == 3 && !checkboxValue){
+      disableSubmitButton(true)
     }
 
     setTokenName(values.appName)
@@ -1269,11 +1292,13 @@ const Main: FC = () => {
                             <input
                               className='form-check-input'
                               type='checkbox'
-                              value=''
+                              checked={checkboxValue}
                               id='flexCheckDefault'
+                              onChange={toggleCheckbox}
                             />
+                            
                             <label className='form-check-label'>
-                              I agree to{' '}
+                              I agree to {' '}
                               <a href='/terms-conditions' target='_blank'>
                                 terms and conditions
                               </a>
