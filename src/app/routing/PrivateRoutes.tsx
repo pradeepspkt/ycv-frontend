@@ -10,6 +10,7 @@ import {AllCoins} from '../pages/AllCoins'
 import {PromotedCoinsList} from '../pages/PromotedCoinsList'
 import {CoinDetails} from '../pages/CoinDetails'
 import {Contact} from '../pages/Contact'
+import {TermsConditions} from '../pages/TermsConditions'
 
 
 
@@ -34,6 +35,7 @@ export function PrivateRoutes() {
         <Route path='/menu-test' component={MenuTestPage} />
         <Route path='/blog-news' component={BlogNews} />
         <Route path='/contact' component={Contact} />
+        <Route path='/terms-conditions' component={TermsConditions} />
         <Route path='/educational-content' component={EducationalContent} />
         <Route path='/details' component={ContentDetail} />
         <Route path='/all-coins' component={AllCoins} />

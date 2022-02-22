@@ -1,26 +1,24 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { FC, useEffect, useRef, useState } from 'react'
-import { KTSVG, toAbsoluteUrl } from '../../../helpers'
-import { Formik, Form, FormikValues, Field, ErrorMessage } from 'formik'
+import React, {FC, useEffect, useRef, useState} from 'react'
+import {KTSVG, toAbsoluteUrl} from '../../../helpers'
+import {Formik, Form, FormikValues, Field, ErrorMessage} from 'formik'
 import * as Yup from 'yup'
-import { StepperComponent } from '../../../assets/ts/components'
-import { Switch } from 'react-router-dom'
-import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc } from "firebase/firestore";
-import { app, db, storage } from '../../../../firebase';
-import { getStorage, ref, uploadString, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
+import {StepperComponent} from '../../../assets/ts/components'
+import {Switch} from 'react-router-dom'
+import {collection, getDocs, deleteDoc, doc, updateDoc, addDoc} from 'firebase/firestore'
+import {app, db, storage} from '../../../../firebase'
+import {getStorage, ref, uploadString, uploadBytesResumable, getDownloadURL} from 'firebase/storage'
+import {ToastContainer, toast} from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 interface ICreateAccount {
   appName: string
   category: string
-  mCap: string,
-  symbol: string,
-  description: string,
-  chartLink: string,
-  webLink: string,
+  mCap: string
+  symbol: string
+  description: string
+  chartLink: string
+  webLink: string
   framework: string
   dbName: string
   dbType: string
@@ -29,10 +27,10 @@ interface ICreateAccount {
   cardExpiryMonth: string
   cardExpiryYear: string
   cardCvv: string
-  saveCard: string,
-  discordLink: string,
-  telegramLink: string,
-  contractAddress: string,
+  saveCard: string
+  discordLink: string
+  telegramLink: string
+  contractAddress: string
   email: string
 }
 
@@ -56,7 +54,7 @@ const inits: ICreateAccount = {
   discordLink: '',
   telegramLink: '',
   contractAddress: '',
-  email: ''
+  email: '',
 }
 
 const createAppSchema = [
@@ -82,30 +80,28 @@ const Main: FC = () => {
   const [currentSchema, setCurrentSchema] = useState(createAppSchema[0])
   const [initValues] = useState<ICreateAccount>(inits)
 
-  const [showSnack, setShowSnack] = useState(true);
-  const [snackMsg, setSnackMsg] = useState('');
+  const [showSnack, setShowSnack] = useState(true)
+  const [snackMsg, setSnackMsg] = useState('')
 
-  const [tokenName, setTokenName] = useState('');
-  const [email, setEmail] = useState('');
-  const [discordLink, setDiscordLink] = useState('');
-  const [contractAddress, setContractAddress] = useState('');
-  const [telegramLink, setTelegramLink] = useState('');
-  const [symbol, setSymbol] = useState('');
-  const [network, setNetwork] = useState('BSC');
-  const [mCap, setMCap] = useState('');
-  const [description, setDescription] = useState('');
-  const [chartlink, setChartLink] = useState('');
-  const [websiteLink, setWebsiteLink] = useState('');
-  const [tokenLogo, setTokenLogo] = useState('');
-  const [checkbox, setCheckbox] = useState('0');
+  const [tokenName, setTokenName] = useState('')
+  const [email, setEmail] = useState('')
+  const [discordLink, setDiscordLink] = useState('')
+  const [contractAddress, setContractAddress] = useState('')
+  const [telegramLink, setTelegramLink] = useState('')
+  const [symbol, setSymbol] = useState('')
+  const [network, setNetwork] = useState('BSC')
+  const [mCap, setMCap] = useState('')
+  const [description, setDescription] = useState('')
+  const [chartlink, setChartLink] = useState('')
+  const [websiteLink, setWebsiteLink] = useState('')
+  const [tokenLogo, setTokenLogo] = useState('')
+  const [checkbox, setCheckbox] = useState('0')
 
+  const [file, setFile] = useState(null)
+  const [imageURL, setURL] = useState('')
 
-  const [file, setFile] = useState(null);
-  const [imageURL, setURL] = useState("");
-
-  const storage = getStorage();
+  const storage = getStorage()
   //@ts-ignore
-
 
   // function handleChange(e:any) {
   //   setFile(e.target.files[0]);
@@ -115,29 +111,25 @@ const Main: FC = () => {
   //   this.setState({ value: event.target.value });
   // },
 
-  const selectChange = async(event) => {
+  const selectChange = async (event) => {
     await setNetwork(event.target.value)
   }
 
-
-  const toggleShowSnack = () => setShowSnack(!showSnack);
+  const toggleShowSnack = () => setShowSnack(!showSnack)
   const snackMessage = (message: string) => {
     setSnackMsg(message)
   }
 
   const handleChange = async (e: any) => {
-    await setFile(await e.target.files[0]);
-    let reader = new FileReader();
-    await reader.readAsDataURL(await e.target.files[0]);
+    await setFile(await e.target.files[0])
+    let reader = new FileReader()
+    await reader.readAsDataURL(await e.target.files[0])
     reader.onload = async (e: any) => {
       //@ts-ignore
       await setURL(await e.target.result.split(',')[1])
     }
-
   }
 
-
-  
   // const postCoinData = async(data:any) => {
 
   //   fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
@@ -154,9 +146,6 @@ const Main: FC = () => {
   //     console.error('Error:', error);
   //   });
   // }
-
-
-
 
   const loadStepper = () => {
     stepper.current = StepperComponent.createInsance(stepperRef.current as HTMLDivElement)
@@ -192,48 +181,47 @@ const Main: FC = () => {
     if (stepper.current.currentStepIndex !== stepper.current.totatStepsNumber) {
       stepper.current.goNext()
     } else {
-
       //@ts-ignore
-      const storageRef = ref(storage, 'images/' + file.name);
+      const storageRef = ref(storage, 'images/' + file.name)
 
       toast.success('🦄 Coin submission in progress', {
-        position: "bottom-right",
+        position: 'bottom-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-      });
-
+      })
 
       //@ts-ignore
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on('state_changed',
+      const uploadTask = uploadBytesResumable(storageRef, file)
+      uploadTask.on(
+        'state_changed',
         (snapshot) => {
           // Observe state change events such as progress, pause, and resume
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           // toggleShowSnack()
 
           switch (snapshot.state) {
             case 'paused':
-              break;
+              break
             case 'running':
-              break;
+              break
           }
         },
         (error) => {
           // Handle unsuccessful uploads
           toast.success('Error submitting! Please try again later.', {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 10000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-          });
+          })
         },
         () => {
           // Handle successful uploads on complete
@@ -256,9 +244,7 @@ const Main: FC = () => {
             //   email: values.email
             // });
 
-
-            
-            const data = { 
+            const data = {
               name: values.appName,
               mCap: values.mCap,
               webLink: values.webLink,
@@ -272,8 +258,8 @@ const Main: FC = () => {
               status: 'pending',
               votes: 0,
               avatar: downloadURL,
-              email: values.email
-             };
+              email: values.email,
+            }
 
             fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
               method: 'POST', // or 'PUT'
@@ -282,43 +268,50 @@ const Main: FC = () => {
               },
               body: JSON.stringify(data),
             })
-            .then(response => response.json())
-            .then(async(data) => {
-              await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=' + values.email + '&coin=' + values.symbol + '&status=pending')
-                .then(response => { })
-                .then(data => { });
-              toast.success('🦄 Coin submitted successfully! Ready for review.', {
-                position: "bottom-right",
-                autoClose: 10000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-              });
-            })
-            .catch((error) => {
-              console.error('Error:', error);
-            });
+              .then((response) => response.json())
+              .then(async (data) => {
+                await fetch(
+                  'https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=' +
+                    values.email +
+                    '&coin=' +
+                    values.symbol +
+                    '&status=pending'
+                )
+                  .then((response) => {})
+                  .then((data) => {})
 
+                await fetch(
+                  'https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=yourcryptovoice@gmail.com' +
+                    '&coin=' +
+                    values.symbol +
+                    '&status=admin'
+                )
+                  .then((response) => {})
+                  .then((data) => {})
+                toast.success('🦄 Coin submitted successfully! Ready for review.', {
+                  position: 'bottom-right',
+                  autoClose: 10000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                })
+              })
+              .catch((error) => {
+                console.error('Error:', error)
+              })
 
             // fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest='+values.email+'&coin='+values.appName+'&status=pending')
             // .then(response => {})
             // .then(data => {});
-
-            
-          });
+          })
         }
-      );
-
-
-
-
+      )
 
       stepper.current.goto(1)
       actions.resetForm()
     }
-
   }
 
   useEffect(() => {
@@ -328,7 +321,6 @@ const Main: FC = () => {
 
     loadStepper()
   }, [stepperRef])
-
 
   return (
     <div className='modal fade' id='kt_modal_create_app' aria-hidden='true'>
@@ -395,7 +387,6 @@ const Main: FC = () => {
                     </div>
                   </div>
 
-
                   {/* <div className='stepper-item' data-kt-stepper-element='nav'>
                     <div className='stepper-line w-40px'></div>
 
@@ -454,7 +445,7 @@ const Main: FC = () => {
                               className='form-control form-control-lg form-control-solid'
                               name='appName'
                               placeholder=''
-                            // onChange={setTokenData('tokenName')}
+                              // onChange={setTokenData('tokenName')}
                             />
                             {tokenName}
                             <div className='text-danger'>
@@ -497,7 +488,6 @@ const Main: FC = () => {
                               className='form-control form-control-lg form-control-solid'
                               name='mCap'
                               placeholder=''
-
                             />
                             <div className='text-danger'>
                               <ErrorMessage name='mCap' />
@@ -520,7 +510,6 @@ const Main: FC = () => {
                               className='form-control form-control-lg form-control-solid'
                               name='contractAddress'
                               placeholder=''
-
                             />
                             <div className='text-danger'>
                               <ErrorMessage name='contractAddress' />
@@ -539,23 +528,31 @@ const Main: FC = () => {
                             </Field>
                           </div> */}
 
-                          <div className="form-floating mb-9">
-                            <select className="form-select" id="floatingSelect" onChange={selectChange} aria-label="Floating label select example">
-                              <option selected value="BSC">Binance Smart Chain (BSC)</option>
-                              <option value="ETH">Ethereum (ETH)</option>
-                              <option value="MATIC">Polygon (MATIC)</option>
-                              <option value="TRX">Tron (TRX)</option>
-                              <option value="FTM">Fantom (FTM)</option>
-                              <option value="SOL">Solana (SOL)</option>
-                              <option value="KCC">Kucoin Chain (KCC)</option>
-                              <option value="Other">Other</option>
+                          <div className='form-floating mb-9'>
+                            <select
+                              className='form-select'
+                              id='floatingSelect'
+                              onChange={selectChange}
+                              aria-label='Floating label select example'
+                            >
+                              <option selected value='BSC'>
+                                Binance Smart Chain (BSC)
+                              </option>
+                              <option value='ETH'>Ethereum (ETH)</option>
+                              <option value='MATIC'>Polygon (MATIC)</option>
+                              <option value='TRX'>Tron (TRX)</option>
+                              <option value='FTM'>Fantom (FTM)</option>
+                              <option value='SOL'>Solana (SOL)</option>
+                              <option value='KCC'>Kucoin Chain (KCC)</option>
+                              <option value='Other'>Other</option>
                             </select>
                             <label>Select Network/Chain</label>
                           </div>
 
                           <div className='fv-row mb-10'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                              <span className='required'>Upload Image </span><span className='text-muted fs-7'>(40*40)</span>
+                              <span className='required'>Upload Image </span>
+                              <span className='text-muted fs-7'>(40*40)</span>
                               <i
                                 className='fas fa-exclamation-circle ms-2 fs-7'
                                 data-bs-toggle='tooltip'
@@ -565,7 +562,7 @@ const Main: FC = () => {
 
                             <input
                               // allows you to reach into your file directory and upload image to the browser
-                              type="file"
+                              type='file'
                               onChange={handleChange}
                             />
                             <div className='text-danger'>
@@ -574,27 +571,25 @@ const Main: FC = () => {
                           </div>
 
                           <div className='fv-row mb-10'>
-                          <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
-                            <span className=''>Contact Email</span>
-                            <i
-                              className='fas fa-exclamation-circle ms-2 fs-7'
-                              data-bs-toggle='tooltip'
-                              title='Specify contact email'
-                            ></i>
-                          </label>
+                            <label className='d-flex align-items-center fs-5 fw-bold mb-2'>
+                              <span className=''>Contact Email</span>
+                              <i
+                                className='fas fa-exclamation-circle ms-2 fs-7'
+                                data-bs-toggle='tooltip'
+                                title='Specify contact email'
+                              ></i>
+                            </label>
 
-                          <Field
-                            type='text'
-                            className='form-control form-control-lg form-control-solid'
-                            name='email'
-                            placeholder=''
-
-                          />
-                          <div className='text-danger'>
-                            <ErrorMessage name='email' />
+                            <Field
+                              type='text'
+                              className='form-control form-control-lg form-control-solid'
+                              name='email'
+                              placeholder=''
+                            />
+                            <div className='text-danger'>
+                              <ErrorMessage name='email' />
+                            </div>
                           </div>
-                        </div>
-
 
                           {/* <div className='fv-row'>
                             <label className='d-flex align-items-center fs-5 fw-bold mb-4'>
@@ -1173,36 +1168,67 @@ const Main: FC = () => {
                           <h1 className='fw-bolder text-dark mb-1'>Review and Submit!</h1>
 
                           <div className='text-muted fs-4'>
-                            {
-                              file ?
-                                <img
-                                  //@ts-ignore
-                                  src={URL.createObjectURL(file)}
-                                  alt=''
-                                  className='w-50 mh-80px m-5'
-                                />
-                                :
-                                null
-                            }
+                            {file ? (
+                              <img
+                                //@ts-ignore
+                                src={URL.createObjectURL(file)}
+                                alt=''
+                                className='w-50 mh-80px m-5'
+                              />
+                            ) : null}
 
-                            <p><b>Name: </b>{tokenName}</p>
-                            <p><b>Symbol: </b>{symbol}</p>
-                            <p><b>Market Cap: </b>{mCap}</p>
-                            <p><b>Contract Address: </b>{contractAddress}</p>
-                            <p><b>Website link: </b>{websiteLink}</p>
-                            <p><b>Chart Link: </b>{chartlink}</p>
-                            <p><b>Discord Link: </b>{discordLink}</p>
-                            <p><b>Telegram Link: </b>{telegramLink}</p>
-                            <p><b>Description: </b>
-                              <div style={{ height: '150px', overflowY: 'scroll' }}>
+                            <p>
+                              <b>Name: </b>
+                              {tokenName}
+                            </p>
+                            <p>
+                              <b>Symbol: </b>
+                              {symbol}
+                            </p>
+                            <p>
+                              <b>Market Cap: </b>
+                              {mCap}
+                            </p>
+                            <p>
+                              <b>Contract Address: </b>
+                              {contractAddress}
+                            </p>
+                            <p>
+                              <b>Website link: </b>
+                              {websiteLink}
+                            </p>
+                            <p>
+                              <b>Chart Link: </b>
+                              {chartlink}
+                            </p>
+                            <p>
+                              <b>Discord Link: </b>
+                              {discordLink}
+                            </p>
+                            <p>
+                              <b>Telegram Link: </b>
+                              {telegramLink}
+                            </p>
+                            <p>
+                              <b>Description: </b>
+                              <div style={{height: '150px', overflowY: 'scroll'}}>
                                 {description}
                               </div>
                             </p>
                           </div>
-                          <div className="form-check form-check-custom form-check-solid fs-5" >
-                            <input className="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
-                            <label className="form-check-label" >
-                              I agree to terms and conditions.
+                          <div className='form-check form-check-custom form-check-solid fs-5'>
+                            <input
+                              className='form-check-input'
+                              type='checkbox'
+                              value=''
+                              id='flexCheckDefault'
+                            />
+                            <label className='form-check-label'>
+                              I agree to{' '}
+                              <a href='/terms-conditions' target='_blank'>
+                                terms and conditions
+                              </a>
+                              .
                             </label>
                           </div>
 
@@ -1215,8 +1241,6 @@ const Main: FC = () => {
                           </div> */}
                         </div>
                       </div>
-
-
 
                       <div className='d-flex flex-stack pt-10'>
                         <div className='me-2'>
@@ -1258,7 +1282,7 @@ const Main: FC = () => {
         </div>
       </div>
       <ToastContainer
-        position="bottom-right"
+        position='bottom-right'
         autoClose={10000}
         hideProgressBar={false}
         newestOnTop
@@ -1267,10 +1291,10 @@ const Main: FC = () => {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        style={{ fontFamily: 'inherit', fontWeight: 'bold' }}
+        style={{fontFamily: 'inherit', fontWeight: 'bold'}}
       />
     </div>
   )
 }
 
-export { Main }
+export {Main}
