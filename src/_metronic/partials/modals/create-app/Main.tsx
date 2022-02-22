@@ -11,6 +11,8 @@ import {getStorage, ref, uploadString, uploadBytesResumable, getDownloadURL} fro
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
+var sizeOf = require('image-size')
+
 interface ICreateAccount {
   appName: string
   category: string
@@ -162,6 +164,53 @@ const Main: FC = () => {
   }
 
   const submitStep = async (values: ICreateAccount, actions: FormikValues) => {
+    //@ts-ignore
+    console.log(stepper.current.currentStepIndex)
+    //@ts-ignore
+    if (!file?.name) {
+      //@ts-ignore
+      await prevStep()
+      alert("Please upload Token's logo.")
+      return
+    }
+    //@ts-ignore
+    else if (!file?.type.match('image.*')) {
+      await prevStep()
+      alert('Please upload valid image.')
+      return
+    } else {
+      // var dimensions = sizeOf(file)
+      // console.log(dimensions.width, dimensions.height)
+      console.log(file)
+      var reader = new FileReader()
+      //Read the contents of Image File.
+      reader.readAsDataURL(file)
+      reader.onload = function (e) {
+        //Initiate the JavaScript Image object.
+        var image: any = new Image()
+
+        //Set the Base64 string return from FileReader as source.
+        //@ts-ignore
+        image.src = e.target.result
+
+        //Validate the File Height and Width.
+        image.onload = async function () {
+          var height = this.height
+          var width = this.width
+          console.log(height)
+          console.log(width)
+          if (height > 96 || width > 96) {
+            //show width and height to user
+            alert('Logo Height and Width must not exceed 90px.')
+            await prevStep()
+            return false
+          }
+          // alert('Uploaded image has valid Height and Width.')
+          // return true
+        }
+      }
+    }
+
     setTokenName(values.appName)
     // setTokenLogo(file)
     setMCap(values.mCap)
