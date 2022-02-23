@@ -11,8 +11,7 @@ import {PromotedCoinsList} from '../pages/PromotedCoinsList'
 import {CoinDetails} from '../pages/CoinDetails'
 import {Contact} from '../pages/Contact'
 import {TermsConditions} from '../pages/TermsConditions'
-
-
+import {Giveaway} from '../pages/Giveaway'
 
 export function PrivateRoutes() {
   const BuilderPageWrapper = lazy(() => import('../pages/layout-builder/BuilderPageWrapper'))
@@ -34,6 +33,7 @@ export function PrivateRoutes() {
         <Route path='/apps/chat' component={ChatPage} />
         <Route path='/menu-test' component={MenuTestPage} />
         <Route path='/blog-news' component={BlogNews} />
+        <Route path='/giveaway' component={Giveaway} />
         <Route path='/contact' component={Contact} />
         <Route path='/terms-conditions' component={TermsConditions} />
         <Route path='/educational-content' component={EducationalContent} />
