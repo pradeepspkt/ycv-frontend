@@ -24,7 +24,7 @@ const BlogNews: React.FC<Props> = ({className, color, svgIcon, iconColor, title,
     const getBlogs = async () => {
       let blogTemp: any = []
       await fetch(
-        'https://us-central1-your-crypto-voice.cloudfunctions.net/getContent?category=blog-news'
+        'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getContent?category=blog-news'
       )
         .then((response) => {
           return response.json()

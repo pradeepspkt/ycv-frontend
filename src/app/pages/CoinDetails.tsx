@@ -80,7 +80,7 @@ const CoinDetails: React.FC<Props> = ({
     }, [])
 
     const getCoinDetail = async () => {
-        await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinDetails?symbol='+id)
+        await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinDetails?symbol='+id)
         .then(response => {
             return response.json()
         })
@@ -105,7 +105,7 @@ const CoinDetails: React.FC<Props> = ({
           });
       
           //@ts-ignore
-        await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol=' + coinDetail.symbol + '&docId=' + coinDetail.id)
+        await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/addVote?symbol=' + coinDetail.symbol + '&docId=' + coinDetail.id)
             .then(response => {
                 return response.json()
             })

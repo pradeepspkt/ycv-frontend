@@ -28,7 +28,7 @@ const StatisticsWidget8: React.FC<Props> = ({
   }, [])
 
   const loadAd = async () => {
-    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getAdvertisement?position=h-bl')
+    await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getAdvertisement?position=h-bl')
       .then(response => {
         return response.json()
       })

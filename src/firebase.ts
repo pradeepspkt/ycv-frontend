@@ -2,17 +2,16 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore"
 import { getStorage } from 'firebase/storage'
 
-
-
 const firebaseConfig = {
-    apiKey: "AIzaSyDKwX0ojrfYSTyLVqX42AeEAgHv4U39ORw",
-    authDomain: "your-crypto-voice.firebaseapp.com",
-    projectId: "your-crypto-voice",
-    storageBucket: "your-crypto-voice.appspot.com",
-    messagingSenderId: "518955640143",
-    appId: "1:518955640143:web:5da76aa105f90f5b5d513a",
-    measurementId: "G-47DG02WCMM"
-};
+    apiKey: "AIzaSyA8va1MLGTQJIcG6duGCbYb9M3woXrQCxQ",
+    authDomain: "yourcryptovoice-a9117.firebaseapp.com",
+    projectId: "yourcryptovoice-a9117",
+    storageBucket: "yourcryptovoice-a9117.appspot.com",
+    messagingSenderId: "208552234387",
+    appId: "1:208552234387:web:4f056380e512b1a8bb2c66",
+    measurementId: "G-NYBFL3NSX8"
+  };
+  
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app)

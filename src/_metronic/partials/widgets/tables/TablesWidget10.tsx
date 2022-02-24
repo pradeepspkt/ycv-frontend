@@ -73,7 +73,7 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
     let respData: any = []
 
     const coinPromise = new Promise(async (resolve, reject) => {
-      await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll')
+      await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll')
         .then((response) => {
           return response.json()
         })
@@ -124,13 +124,13 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
       network.length > 0
         ? //@ts-ignore
           (url =
-            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' +
+            'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll?network=' +
             network +
             '&startAt=' +
             firstVisible[firstVisible.length - 2])
         : //@ts-ignore
           (url =
-            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAt=' +
+            'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll?startAt=' +
             firstVisible[firstVisible.length - 2])
 
     fetch(url)
@@ -201,13 +201,13 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
       network.length > 0
         ? //@ts-ignore
           (url =
-            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' +
+            'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll?network=' +
             network +
             '&startAfter=' +
             lastVisible[lastVisible.length - 1])
         : //@ts-ignore
           (url =
-            'https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?startAfter=' +
+            'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll?startAfter=' +
             lastVisible[lastVisible.length - 1])
 
     const coinPromise = new Promise(async (resolve, reject) => {
@@ -292,7 +292,7 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
 
 
     await fetch(
-      'https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol=' +
+      'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/addVote?symbol=' +
         coin +
         '&docId=' +
         id
@@ -353,7 +353,7 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
       getCoins()
       return
     }
-    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsAll?network=' + network)
+    await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsAll?network=' + network)
       .then((response) => {
         return response.json()
       })

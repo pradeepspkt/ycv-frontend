@@ -27,7 +27,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
   const getCoins = async (status: string) => {
     // setPromotedList([])
     let listTemp: any = []
-     fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/getCoinsPromoted?status='+status)
+     fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getCoinsPromoted?status='+status)
             .then(response => {
                 return response.json()
             })
@@ -61,7 +61,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     //   progress: undefined,
     // });
     
-    await fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
+    await fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/addVote?symbol='+coin+'&docId='+id)
             .then(response => {
                 return response.json()
             })

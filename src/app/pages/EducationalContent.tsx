@@ -31,7 +31,7 @@ const EducationalContent: React.FC<Props> = ({
     const getBlogs = async () => {
       let blogTemp: any = []
       await fetch(
-        'https://us-central1-your-crypto-voice.cloudfunctions.net/getContent?category=educational'
+        'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getContent?category=educational'
       )
         .then((response) => {
           return response.json()

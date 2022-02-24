@@ -75,7 +75,7 @@ const Giveaway: React.FC<Props> = ({className, color, svgIcon, iconColor, title,
     setName(values.name)
     setEmail(values.email)
     await fetch(
-      'https://us-central1-your-crypto-voice.cloudfunctions.net/addGiveaway?name=' +
+      'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/addGiveaway?name=' +
         values.name +
         '&email=' +
         values.email

@@ -143,22 +143,7 @@ const Main: FC = () => {
     }
   }
 
-  // const postCoinData = async(data:any) => {
 
-  //   fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
-  //     method: 'POST', // or 'PUT'
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify(data),
-  //   })
-  //   .then(response => response.json())
-  //   .then(data => {
-  //   })
-  //   .catch((error) => {
-  //     console.error('Error:', error);
-  //   });
-  // }
 
   const loadStepper = () => {
     stepper.current = StepperComponent.createInsance(stepperRef.current as HTMLDivElement)
@@ -333,7 +318,7 @@ const Main: FC = () => {
               email: values.email,
             }
 
-            fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/addCoin', {
+            fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/addCoin', {
               method: 'POST', // or 'PUT'
               headers: {
                 'Content-Type': 'application/json',
@@ -343,7 +328,7 @@ const Main: FC = () => {
               .then((response) => response.json())
               .then(async (data) => {
                 await fetch(
-                  'https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=' +
+                  'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/sendMail?dest=' +
                     values.email +
                     '&coin=' +
                     values.symbol +
@@ -353,7 +338,7 @@ const Main: FC = () => {
                   .then((data) => {})
 
                 await fetch(
-                  'https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest=yourcryptovoice@gmail.com' +
+                  'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/sendMail?dest=yourcryptovoice@gmail.com' +
                     '&coin=' +
                     values.symbol +
                     '&status=admin'
@@ -374,7 +359,7 @@ const Main: FC = () => {
                 console.error('Error:', error)
               })
 
-            // fetch('https://us-central1-your-crypto-voice.cloudfunctions.net/sendMail?dest='+values.email+'&coin='+values.appName+'&status=pending')
+            // fetch('https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/sendMail?dest='+values.email+'&coin='+values.appName+'&status=pending')
             // .then(response => {})
             // .then(data => {});
           })
