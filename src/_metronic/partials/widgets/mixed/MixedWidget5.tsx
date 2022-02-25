@@ -32,9 +32,17 @@ const MixedWidget5: React.FC<Props> = ({className, time, image, title, descripti
           {/* end::Info */}
 
           {/* begin::Link */}
-          <a href='#' className='text-dark fw-bolder text-hover-primary fs-4'>
+          <Link to={{
+          pathname: '/details',
+          state:{
+            title: title,
+            description: description,
+            category: category
+          }
+        }} className="text-dark fw-bolder text-hover-primary fs-4" >{title}</Link>
+          {/* <a href='#' className='text-dark fw-bolder text-hover-primary fs-4'>
             {title}
-          </a>
+          </a> */}
           {/* end::Link */}
 
           {/* begin::Desc */}
