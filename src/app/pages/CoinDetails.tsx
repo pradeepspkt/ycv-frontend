@@ -497,7 +497,7 @@ const CoinDetails: React.FC<Props> = ({
                             className='mx-2 fs-4'
                             rel='noreferrer'
                           >
-                            Discord
+                            Telegram
                           </a>{' '}
                         </>
                       ) : null
