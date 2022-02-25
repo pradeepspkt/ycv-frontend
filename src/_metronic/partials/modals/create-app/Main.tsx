@@ -600,6 +600,7 @@ const Main: FC = () => {
                               <option value='TRX'>Tron (TRX)</option>
                               <option value='FTM'>Fantom (FTM)</option>
                               <option value='SOL'>Solana (SOL)</option>
+                              <option value='SOL'>Cardano (ADA)</option>
                               <option value='KCC'>Kucoin Chain (KCC)</option>
                               <option value='Other'>Other</option>
                             </select>

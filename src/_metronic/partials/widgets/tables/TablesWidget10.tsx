@@ -332,7 +332,6 @@ const TablesWidget10: React.FC<Props> = ({className, hideViewAllButton}) => {
     await main()
   }
 
-
   function round(val: any, multiplesOf: any) {
     var s = 1 / multiplesOf
     var res = Math.ceil(val * s) / s
@@ -470,7 +469,7 @@ $308,236,260
           <span className='text-dark fw-bold text-dark d-block fs-7 mt-4'>
             {
               //@ts-ignore
-              item.mCap == 0
+              item.mCap == 0 || item.mCap == 'NA'
                 ? '--'
                 : '$' +
                 //@ts-ignore
@@ -680,12 +679,13 @@ $308,236,260
                 data-bs-toggle='tab'
                 // href='#kt_table_widget_6_tab_3'
                 onClick={() => {
-                  setNetwork('Other')
+                  setNetwork('ADA')
                 }}
               >
-                Other
+                ADA
               </a>
             </li>
+          
           </ul>
           {hideViewAllButton ? null : (
             <Link to='/all-coins' className='btn btn-sm btn-light-primary'>

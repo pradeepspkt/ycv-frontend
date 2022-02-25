@@ -148,7 +148,7 @@ const TablesWidget12: React.FC<Props> = ({ className, hideViewAllButton }) => {
     </a> */}
             <span className='text-dark fw-bold text-dark d-block fs-7'>{
               //@ts-ignore
-              item.mCap == 0 ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
+              item.mCap == 0 || item.mCap == 'NA' ? '--' : '$' + Number(item.mCap).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}</span>
           </td>
           <td>
             {/* <button type='submit' className='btn btn-sm btn-primary' data-kt-menu-dismiss='true'>
