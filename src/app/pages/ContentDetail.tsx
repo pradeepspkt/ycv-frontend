@@ -1,8 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
 // import {toAbsoluteUrl} from '../../../helpers'
-import {useLocation} from 'react-router-dom'
+import {useLocation, useParams} from 'react-router-dom'
 // import htmlToDraft from 'html-to-draftjs';
 import {
   FacebookShareButton,
@@ -18,6 +18,8 @@ import {
   ViberShareButton,
   ViberIcon,
 } from 'react-share'
+import {BallTriangle, Triangle, CradleLoader} from 'react-loader-spinner'
+
 
 type Props = {
   className: string
@@ -31,14 +33,40 @@ type Props = {
 const ContentDetail: React.FC<Props> = ({className, time, image}) => {
   const location = useLocation()
   //@ts-ignore
-  const {title, description, category} = location.state
+  // const {title, description, category} = location.state
+
+  const [detail, setDetail] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  //@ts-ignore
+  const {id} = useParams()
+
+  useEffect(() => {
+    getContentDetail()
+  }, [])
+
+  const getContentDetail = async () => {
+    await setLoading(true)
+    await fetch(
+      'https://us-central1-yourcryptovoice-a9117.cloudfunctions.net/getContentDetails?id=' + id
+    )
+      .then((response) => {
+        return response.json()
+      })
+      .then(async (data) => {
+        await setDetail(data.content)
+      })
+      await setLoading(false)
+  }
 
   return (
     <div className='card card-xl-stretch mb-5 mb-xl-8'>
       {/* begin::Body */}
       <div className='card-body d-flex flex-column pb-10 pb-lg-15'>
         <div className='xl-col-2'>
-          {category == 'educational' ? (
+          {
+            //@ts-ignore
+          detail?.category == 'educational' ? (
             <Link to='/educational-content' className='btn btn-primary btn-sm'>
               Go Back
             </Link>
@@ -56,11 +84,14 @@ const ContentDetail: React.FC<Props> = ({className, time, image}) => {
               <br />
               <span className='fw-bolder' style={{
                         textDecoration: 'underline',
-                      }}>{title}</span>
+                      }}>{
+                        //@ts-ignore
+                      detail?.title}</span>
               <br />
               <br />
-              <p className='py-2' dangerouslySetInnerHTML={{__html: description}}></p>
-
+              <p className='py-2' dangerouslySetInnerHTML={
+                //@ts-ignore
+                {__html: detail?.description}}></p>
               {/* {description} */}
             </span>
           </div>
@@ -72,8 +103,10 @@ const ContentDetail: React.FC<Props> = ({className, time, image}) => {
             Share
             <div className='col-xl-12 mt-5'>
               <FacebookShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}
                 hashtag={'#yourcryptovoice'}
                 //@ts-ignore
                 // className={{
@@ -83,41 +116,46 @@ const ContentDetail: React.FC<Props> = ({className, time, image}) => {
                 <FacebookIcon size={36} />
               </FacebookShareButton>
               <TwitterShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
-                // hashtag="#camperstribe"
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}                // hashtag="#camperstribe"
                 //  className={classes.socialMediaButton}
               >
                 <TwitterIcon size={36} />
               </TwitterShareButton>
               <WhatsappShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
-                separator=':: '
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}                separator=':: '
                 //  className={classes.socialMediaButton}
               >
                 <WhatsappIcon size={36} />
               </WhatsappShareButton>
               <TelegramShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
-                // separator=":: "
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}                // separator=":: "
                 //  className={classes.socialMediaButton}
               >
                 <TelegramIcon size={36} />
               </TelegramShareButton>
               <LinkedinShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
-                // separator=":: "
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}                // separator=":: "
                 //  className={classes.socialMediaButton}
               >
                 <LinkedinIcon size={36} />
               </LinkedinShareButton>
               <ViberShareButton
-                url={'https://www.yourcryptovoice.com/blog-news/'}
-                title={'Your Crypto Voice, Vote your favorite coin today.'}
-                // separator=":: "
+                url={'https://www.yourcryptovoice.com/details/'+id}
+                title={
+                  //@ts-ignore
+                  detail?.title}                // separator=":: "
                 //  className={classes.socialMediaButton}
               >
                 <ViberIcon size={36} />

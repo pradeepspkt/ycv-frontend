@@ -21,8 +21,8 @@ const ErrorsPage: React.FC = () => {
           <a href='/dashboard' className='mb-10 pt-lg-20'>
             <img
               alt='Logo'
-              src={toAbsoluteUrl('/media/logos/logo-1.svg')}
-              className='h-50px mb-5'
+              src={toAbsoluteUrl('/media/logos/logo-5.png')}
+              className='h-200px mb-5'
             />
           </a>
           <div className='pt-lg-10 mb-10'>

@@ -94,7 +94,7 @@ const TermsConditions: React.FC<Props> = ({
                   <br />
                   <i className='fa fa-genderless text-primary mx-2'></i> Your Crypto Voice reserves the
                   right to delete or unlist if we find it illegitimate. We request our user to email
-                  us at <a href="mailto:info@yourcryptovoice.com">info@yourcryptovoice.com</a> if you find any misleading information. We will try
+                  us at <a href="mailto:yourcryptovoice@gmail.com">yourcryptovoice@gmail.com</a> if you find any misleading information. We will try
                   to get back to you ASAP.
                   <br /><br/><br/>
                   <h5 style={{

@@ -50,9 +50,9 @@ const Contact: React.FC<Props> = ({className, color, svgIcon, iconColor, title, 
               <div className='d-flex align-items-center pe-2 mb-15'>
                 <span className='text-center fw-bolder fs-6 flex-grow-1 m-1'>
                   We offer Banner Ad spots. For prices and information, please email us at:
-                  <a href='mailto:advertisement@yourcryptovoice.com'>
+                  <a href='mailto:yourcryptovoice@gmail.com'>
                     {' '}
-                    advertisement@yourcryptovoice.com
+                    yourcryptovoice@gmail.com
                   </a>
                 </span>
               </div>
@@ -64,7 +64,7 @@ const Contact: React.FC<Props> = ({className, color, svgIcon, iconColor, title, 
               <div className='d-flex align-items-center pe-2 mb-8'>
                 <span className='text-center fw-bolder fs-6 flex-grow-1 m-1 mb-15'>
                   To ask anything else email us at:
-                  <a href='mailto:contact@yourcryptovoice.com'> contact@yourcryptovoice.com</a>
+                  <a href='mailto:yourcryptovoice@gmail.com'> yourcryptovoice@gmail.com</a>
                 </span>
               </div>
             </div>

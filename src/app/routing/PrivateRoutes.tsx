@@ -12,6 +12,7 @@ import {CoinDetails} from '../pages/CoinDetails'
 import {Contact} from '../pages/Contact'
 import {TermsConditions} from '../pages/TermsConditions'
 import {Giveaway} from '../pages/Giveaway'
+import {Roadmap} from '../pages/Roadmap'
 
 export function PrivateRoutes() {
   const BuilderPageWrapper = lazy(() => import('../pages/layout-builder/BuilderPageWrapper'))
@@ -35,9 +36,10 @@ export function PrivateRoutes() {
         <Route path='/blog-news' component={BlogNews} />
         <Route path='/giveaway' component={Giveaway} />
         <Route path='/contact' component={Contact} />
+        <Route path='/roadmap' component={Roadmap} />
         <Route path='/terms-conditions' component={TermsConditions} />
         <Route path='/educational-content' component={EducationalContent} />
-        <Route path='/details' component={ContentDetail} />
+        <Route path='/details/:id' component={ContentDetail} />
         <Route path='/all-coins' component={AllCoins} />
         <Route path='/coin-details/:id' component={CoinDetails} />
         <Route path='/promoted-coins' component={PromotedCoinsList} />
