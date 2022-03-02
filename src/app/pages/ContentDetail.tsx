@@ -70,6 +70,27 @@ const ContentDetail: React.FC<Props> = ({className, time, image}) => {
           }
         </title>
         <link rel='canonical' href={'http://yourcryptovoice.com/details/' + id} />
+        <meta property="title" content={
+          //@ts-ignore
+          detail?.title} />
+         <meta property="quote" content={//@ts-ignore
+          detail?.title} />
+         <meta name="description" content={//@ts-ignore
+          detail?.description} />
+         {/* <meta property="image" content={image} /> */}
+         <meta property="og:locale" content="en_US" />
+         <meta property="og:type" content="website" />
+         <meta property="og:title" content={//@ts-ignore
+          detail?.title} />
+         <meta property="og:quote" content={//@ts-ignore
+          detail?.title} />
+         <meta property="og:hashtag" content={'#yourcryptovoice'} />
+         {/* <meta property="og:image" content={image} /> */}
+         <meta content="image/*" property="og:image:type" />
+         <meta property="og:url" content={'https://yourcryptovoice.com/details/'+id} />
+         <meta property="og:site_name" content="Your Crypto Voice" />
+         <meta property="og:description" content={//@ts-ignore
+          detail?.description} />  
       </Helmet>
       {/* begin::Body */}
       <div className='card-body d-flex flex-column pb-10 pb-lg-15'>
